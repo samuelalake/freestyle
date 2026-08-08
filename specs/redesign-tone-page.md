@@ -49,8 +49,31 @@ then pick a voice."
 | 05 | **Routing is scattered across the tabs that routing decides.** `AppAssignments` renders inside all four panels. To move Discord from Personal to Work you must first know which tab owns it — which is why `route-ownership.ts` exists at all. | `tone.tsx:591–648`; `route-ownership.ts` |
 | 06 | **One option has three different names.** The stored value is `friendly`, the label is "Enthusiastic", the description is "Upbeat and warm". | `cleanup-tones.ts:15` vs `en.json` `tone.work.cards.friendly` |
 | 07 | **The tab strip is hand-rolled against the design system.** `DESIGN.md` §6 names `SegmentedControl` for segmented options, and it is used in Settings, Plugins, Onboarding, and the upgrade modal. Tone instead styles a raw `TabsList` with `rounded-full` + `data-active:bg-accent`. | `tone.tsx:549–566`; `DESIGN.md` §6 |
+| 08 | **Four of the five tabs are the same screen.** Personal, Work, Email and Everything else render an identical 4-card stack plus preview, differing only in three words and a row of app icons. The tab bar is asking the user to navigate between four instances of one control. | observed on 0.7.1; `tone.tsx:582–649` |
+| 09 | **The two layouts disagree.** Cleanup lays its four options out as a horizontal 4-across row; the other four tabs stack theirs vertically. Same control, same option count, two layouts, no reason. | observed on 0.7.1 |
+| 10 | **There is room for all of it at once.** At a 1456px-wide window each tab fills roughly half the viewport height and leaves 250–370px of dead space below. The information that needs five clicks to read would fit on one screen with room to spare. | observed on 0.7.1 |
+| 11 | **The page can be entirely inert and still fully interactive.** With cleanup off, every control still responds and saves — the page's own first line is "Cleanup is off … Your choices are saved until then." See §3.1: on the default Freestyle Transcribe path this banner is *wrong*, and its instruction cannot be followed. | `tone.tsx:534–542` |
 
-Defects 01–05 are the ones a user feels. 06–07 are cheap to fix alongside.
+Defects 01–05 and 08–11 are the ones a user feels. 06–07 are cheap to fix alongside.
+
+### 3.1 A dead-end path, worth fixing on its own
+
+Tone and Models disagree about whether cleanup is on, and they disagree exactly on the
+path the roadmap wants every user to take.
+
+- `models/index.tsx:339` passes `cleanupLocked={freestyleVoiceActive}` — cleanup is
+  "locked on" whenever Freestyle Transcribe is the voice model, because it's included.
+- `pair-card.tsx:38` therefore renders the toggle as on: `cleanupOn = cleanupLocked || llmCleanup`,
+  and `pair-card.tsx:77` **disables** it (`toggleDisabled={cleanupLocked}`).
+- `tone.tsx:534` gates on `llmCleanup` alone, so Tone shows "Cleanup is off. These strength
+  and tone settings apply once you turn on AI cleanup in Models."
+
+So a Freestyle Transcribe user is told to go turn on a setting that Models already shows as
+on and does not let them touch. Reproduced live on 0.7.1.
+
+The fix is to derive "is cleanup active" once and share it, rather than letting two pages
+compute it from different inputs. Worth landing as its own PR ahead of this redesign, since
+it is a bug rather than a design change.
 
 ---
 
