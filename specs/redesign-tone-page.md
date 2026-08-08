@@ -110,12 +110,25 @@ The current value is always visible without opening anything. Its onboarding als
 **task** — "Write a message", "Draft an email", "Take a note" — rather than by abstract
 category, which sidesteps defect 01 entirely.
 
-**macOS System Settings → Notifications, and Chrome → Site Settings.** Both use the
-canonical shape for this problem: one default, then a scrollable list of per-thing
-exceptions. That is §5.3 below, and it is a pattern users already know from their OS and
-their browser.
+**macOS System Settings → Notifications.** Global settings first (Show previews, Show
+Notifications when…), then an "Application Notifications" list where **every row carries its
+current value as a subtitle** — `Calendar / Badges, Sounds, Desktop, Time Sensitive`,
+`App Store / Off`. You can read the entire configuration by scrolling once.
 
-Three takeaways, all of which the proposal follows:
+**Chrome → Site Settings → Notifications.** The most explicit of the four, and the closest to
+§5.3. It names both halves in the UI:
+
+- **"Default behavior"** — "Sites automatically follow this setting when you visit them",
+  then a radio list.
+- **"Customized behaviors"** — "Sites listed below follow a custom setting instead of the
+  default", then the exceptions grouped by outcome, each with an `Add` button.
+
+That copy is better than what this spec originally proposed. "App overrides" describes the
+mechanism; Chrome's phrasing describes the *relationship to the default*, which is the thing
+a user actually needs to understand. §5.3 has been renamed **Exceptions** and takes the same
+one-line explanation.
+
+Four apps, four teams, one shape. Three takeaways, all of which the proposal follows:
 
 1. **Neither competitor uses a horizontal tab strip for settings.** Both use a sidebar or a
    list, because the set of things being configured should be visible while you configure one.
@@ -164,9 +177,10 @@ one mount point.
 This kills the tab strip, `ToneTab`, `isToneTab`, the per-tab `TabsContent`
 wiring, and four of the five `AppAssignments` mounts.
 
-### 5.3 `APP OVERRIDES` — routing, once
+### 5.3 `EXCEPTIONS` — routing, once
 
-One section listing every assignment, with a `Select` per row for its
+Borrowing Chrome's framing: one line — "Apps and sites listed here use a different voice
+than the one they'd normally get" — then one section listing every assignment, with a `Select` per row for its
 destination, and a single add control. `route-ownership.ts` collapses to "which
 group owns this app", with no per-tab visibility filtering
 (`getVisibleBuiltinRouteIds` goes away) (defect 05).
