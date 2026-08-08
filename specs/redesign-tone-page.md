@@ -122,10 +122,11 @@ current value as a subtitle** — `Calendar / Badges, Sounds, Desktop, Time Sens
 - **"Customized behaviors"** — "Sites listed below follow a custom setting instead of the
   default", then the exceptions grouped by outcome, each with an `Add` button.
 
-That copy is better than what this spec originally proposed. "App overrides" describes the
-mechanism; Chrome's phrasing describes the *relationship to the default*, which is the thing
-a user actually needs to understand. §5.3 has been renamed **Exceptions** and takes the same
-one-line explanation.
+Worth being precise about how far this transfers. Chrome's framing is right *for Chrome* —
+one default, sites that deviate. Freestyle has four groups and every app belongs to one, so
+"exceptions" is the wrong word and an earlier draft of this spec was wrong to borrow it (see
+§5.2). What does transfer is smaller and more durable: **Chrome puts its `Add` control
+directly beside the list it adds to**, never in a separate section. So does superwhisper.
 
 Four apps, four teams, one shape. Three takeaways, all of which the proposal follows:
 
@@ -140,7 +141,7 @@ Worth noting for the separate hotkey issue: Wispr Flow renders modifiers as **gl
 word** (`^ Ctrl`, `⌥ Opt`) in both its home screen and its settings — shipping precedent in
 the same product category for the legibility fix.
 
-## 5. Proposal — one page, three sections, no tabs
+## 5. Proposal — one page, two sections, no tabs
 
 The page becomes a single scrolling column at the standard ~760px measure,
 following the page rhythm in `DESIGN.md` §7: title → one muted sentence → card →
@@ -154,37 +155,55 @@ revealed under Custom. This is the only setting that already has a non-`off`
 default (`medium`) and the only one that applies everywhere — it earns the top
 slot and it stops pretending to be a peer of "Email" (defect 04).
 
-### 5.2 `HOW YOU SOUND` — all four surfaces, visible at once
+### 5.2 `HOW YOU SOUND` — four surfaces, each owning its own apps
 
-Four rows in one `Card`, hairline-divided, one per surface:
+Four rows in one `Card`, hairline-divided. Each row is two lines — the name and a
+`SegmentedControl` (defect 07) on top, that group's apps beneath:
 
 ```
-Personal      Messages · WhatsApp · Telegram · Discord      [ Off | Polished | Casual | Very casual ]
-Work          Slack · LinkedIn · work chat                  [ Off | Direct | Enthusiastic | Formal ]
-Email         Gmail · Outlook · Apple Mail · Proton         [ Off | Casual | Warm | Formal ]
-Everything else   Anywhere that isn't a chat or email       [ Off | Casual | Neutral | Professional ]
+Personal                              [ Off | Casual | Polished | Very casual ]
+  ⬚ Messages   ⬚ WhatsApp   ⬚ Telegram        + Add app or site
+
+Work                                  [ Off | Direct | Enthusiastic | Formal ]
+  ⬚ Slack   ⬚ LinkedIn   ⬚ Discord   ⬚ notion.so    + Add app or site
+
+Email                                 [ Off | Casual | Warm | Formal ]
+  ⬚ Gmail   ⬚ Outlook   ⬚ Apple Mail   ⬚ Proton     + Add app or site
+
+Everywhere else                       [ Off | Casual | Neutral | Professional ]
+  Anything not listed above — no need to add apps here.
 ```
 
-Each row is a `SegmentedControl` (defect 07). The routed apps become a muted
-caption using the existing `AppMarkRow`, so "what counts as Work" is answered in
-place rather than one tab away (defect 03).
+**Routing lives on the row, not in a separate section.** An earlier draft of this spec
+pulled all assignments into one "Exceptions" table at the bottom, borrowing Chrome's
+"Default behavior / Customized behaviors" framing. That was wrong on two counts:
+
+- **The model doesn't map.** Chrome has one default and sites that deviate from it.
+  Freestyle has four groups and every app belongs to exactly one — membership, not
+  deviation. "Exceptions" imports a mental model the feature doesn't have.
+- **It made the common action worse.** Adding an app to Work went from "you're looking at
+  Work, press +" to "scroll to another section, press add, then pick Work from a dropdown."
+  Two decisions where there was one. The current tabbed page gets this part right, and
+  superwhisper agrees — its "Activate for apps" sits inside the mode it applies to.
+
+So the existing per-destination `AppAssignments` behaviour is kept; it just renders on a row
+instead of inside a tab panel, and all four are visible simultaneously (defects 03, 05).
+
+`+ Add app or site` opens a popover anchored to its row. The destination is already implied
+by which row was clicked, so there is no destination picker. Because an app belongs to
+exactly one group, an app already assigned elsewhere shows its current group inline
+("Currently Personal") and choosing it **moves** it. That is the one job
+`route-ownership.ts` keeps; per-tab visibility filtering (`getVisibleBuiltinRouteIds`) goes
+away. Chips carry an `×` on hover; removing a built-in returns it to Everywhere else rather
+than deleting it.
 
 Preview stays, but as **one** panel below the rows that reflects the row you last
 touched — instead of five previews mounted in five tabs. Same preview components,
 one mount point.
 
-This kills the tab strip, `ToneTab`, `isToneTab`, the per-tab `TabsContent`
-wiring, and four of the five `AppAssignments` mounts.
+This kills the tab strip, `ToneTab`, `isToneTab`, and the per-tab `TabsContent` wiring.
 
-### 5.3 `EXCEPTIONS` — routing, once
-
-Borrowing Chrome's framing: one line — "Apps and sites listed here use a different voice
-than the one they'd normally get" — then one section listing every assignment, with a `Select` per row for its
-destination, and a single add control. `route-ownership.ts` collapses to "which
-group owns this app", with no per-tab visibility filtering
-(`getVisibleBuiltinRouteIds` goes away) (defect 05).
-
-### 5.4 Defaults
+### 5.3 Defaults
 
 Ship a non-`off` default so the page means something on first visit (defect 02).
 Recommended: `overall: "neutral"`, the other three `off` — i.e. Freestyle has a
