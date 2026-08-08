@@ -54,7 +54,14 @@ then pick a voice."
 | 10 | **There is room for all of it at once.** At a 1456px-wide window each tab fills roughly half the viewport height and leaves 250–370px of dead space below. The information that needs five clicks to read would fit on one screen with room to spare. | observed on 0.7.1 |
 | 11 | **The page can be entirely inert and still fully interactive.** With cleanup off, every control still responds and saves — the page's own first line is "Cleanup is off … Your choices are saved until then." See §3.1: on the default Freestyle Transcribe path this banner is *wrong*, and its instruction cannot be followed. | `tone.tsx:534–542` |
 
-Defects 01–05 and 08–11 are the ones a user feels. 06–07 are cheap to fix alongside.
+| 12 | **"Cleanup" names three different things on one page.** It is a tab (`tabs.cleanup`), a section eyebrow (`cleanup.eyebrow`), and an on/off toggle for the whole feature (`cleanup.toggleLabel`) — while the control the tab actually contains is called **"Strength"** (`cleanup.strengthLabel`), and the section heading renames it a fourth time to "Tidy up as I talk." So the banner can say "Cleanup is off" while the Cleanup tab shows Medium selected. Both are true; together they are incoherent. | `en.json` `tone.tabs.cleanup`, `tone.cleanup.{eyebrow,toggleLabel,strengthLabel,title}` |
+
+Defects 01–05 and 08–12 are the ones a user feels. 06–07 are cheap to fix alongside.
+
+Defect 12 is the clearest single symptom of defect 04: the page is trying to present a
+global on/off, a global intensity, and four local voices as one flat set of peers, and the
+vocabulary buckles under it. Renaming the tab to **Strength** — matching the label the code
+already uses — is a one-line fix worth doing whatever happens to the rest of this proposal.
 
 ### 3.1 A dead-end path, worth fixing on its own
 
@@ -77,13 +84,57 @@ it is a bug rather than a design change.
 
 ---
 
-## 4. Proposal — one page, three sections, no tabs
+## 4. What comparable apps do
+
+Rather than invent a shape, I opened the two closest competitors — both dictation apps
+solving the same problem — and Apple's own answer to per-app overrides.
+
+**superwhisper — "Modes".** The direct analogue of destination tones. Its answer is a **flat
+list you drill into**, not a tab strip: every mode is visible at once, with `+ Create mode`
+to add one. Inside a mode, settings are grouped `label → right-aligned control` rows —
+Preset, Language, Voice Model — and crucially **"Activate for apps" lives inside the mode it
+applies to**, so routing is never scattered. Rarely-used settings sit behind a collapsed
+"Advanced settings" disclosure. It fits roughly nine settings in the vertical space Freestyle
+spends on one.
+
+**Wispr Flow — Settings.** Sidebar nav, no tabs. Every row is `Label / current value as
+subtitle / [Change]`:
+
+```
+Shortcuts     Hold ^ Ctrl + ⌥ Opt and speak.     [Change]
+Microphone    Auto-detect (Headphones)           [Change]
+Languages     English                            [Change]
+```
+
+The current value is always visible without opening anything. Its onboarding also asks by
+**task** — "Write a message", "Draft an email", "Take a note" — rather than by abstract
+category, which sidesteps defect 01 entirely.
+
+**macOS System Settings → Notifications, and Chrome → Site Settings.** Both use the
+canonical shape for this problem: one default, then a scrollable list of per-thing
+exceptions. That is §5.3 below, and it is a pattern users already know from their OS and
+their browser.
+
+Three takeaways, all of which the proposal follows:
+
+1. **Neither competitor uses a horizontal tab strip for settings.** Both use a sidebar or a
+   list, because the set of things being configured should be visible while you configure one.
+2. **Current values are visible without navigating.** Freestyle requires five clicks to read
+   five values.
+3. **Routing lives with the thing it routes to**, in one place, not spread across the tabs
+   that routing decides.
+
+Worth noting for the separate hotkey issue: Wispr Flow renders modifiers as **glyph plus
+word** (`^ Ctrl`, `⌥ Opt`) in both its home screen and its settings — shipping precedent in
+the same product category for the legibility fix.
+
+## 5. Proposal — one page, three sections, no tabs
 
 The page becomes a single scrolling column at the standard ~760px measure,
 following the page rhythm in `DESIGN.md` §7: title → one muted sentence → card →
 `mt-7` + mono eyebrow per section.
 
-### 4.1 `HOW MUCH TO FIX` — cleanup intensity
+### 5.1 `HOW MUCH TO FIX` — cleanup intensity
 
 The existing `CleanupTonePanel` moves up as its own section, unchanged in
 behaviour: Low / Medium / High / Custom, with the custom-prompt textarea
@@ -91,7 +142,7 @@ revealed under Custom. This is the only setting that already has a non-`off`
 default (`medium`) and the only one that applies everywhere — it earns the top
 slot and it stops pretending to be a peer of "Email" (defect 04).
 
-### 4.2 `HOW YOU SOUND` — all four surfaces, visible at once
+### 5.2 `HOW YOU SOUND` — all four surfaces, visible at once
 
 Four rows in one `Card`, hairline-divided, one per surface:
 
@@ -113,14 +164,14 @@ one mount point.
 This kills the tab strip, `ToneTab`, `isToneTab`, the per-tab `TabsContent`
 wiring, and four of the five `AppAssignments` mounts.
 
-### 4.3 `APP OVERRIDES` — routing, once
+### 5.3 `APP OVERRIDES` — routing, once
 
 One section listing every assignment, with a `Select` per row for its
 destination, and a single add control. `route-ownership.ts` collapses to "which
 group owns this app", with no per-tab visibility filtering
 (`getVisibleBuiltinRouteIds` goes away) (defect 05).
 
-### 4.4 Defaults
+### 5.4 Defaults
 
 Ship a non-`off` default so the page means something on first visit (defect 02).
 Recommended: `overall: "neutral"`, the other three `off` — i.e. Freestyle has a
@@ -130,7 +181,7 @@ something before it is configured.
 
 ---
 
-## 5. The open question — should the four vocabularies merge?
+## 6. The open question — should the four vocabularies merge?
 
 Defect 01 is the deepest one, and fixing it properly is a **schema** change, not
 a renderer change, so it is flagged rather than assumed.
@@ -145,13 +196,13 @@ That is a better product and a worse diff: it changes `cleanup-tones.ts`, the
 server's `destination-style.ts`, and needs a migration for existing users' four
 stored enums.
 
-**Recommendation:** land §4 first (renderer-only, no migration, immediately
+**Recommendation:** land §5 first (renderer-only, no migration, immediately
 better), and treat the shared axis as a follow-up once the shape is agreed. Happy
 to spec the migration separately if you want it in one go.
 
 ---
 
-## 6. Non-goals
+## 7. Non-goals
 
 - Changing what any tone actually does to the text — prompt content in
   `cleanup-presets.ts` and `destination-style.ts` is untouched.
@@ -163,7 +214,7 @@ to spec the migration separately if you want it in one go.
 
 ---
 
-## 7. How this gets verified
+## 8. How this gets verified
 
 Against `DESIGN.md`: no new hues, `SegmentedControl` over hand-rolled controls,
 mono eyebrows instead of `<h2>`s, hairline dividers, one olive accent word in the
