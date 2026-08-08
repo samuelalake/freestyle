@@ -53,7 +53,6 @@ then pick a voice."
 | 09 | **The two layouts disagree.** Cleanup lays its four options out as a horizontal 4-across row; the other four tabs stack theirs vertically. Same control, same option count, two layouts, no reason. | observed on 0.7.1 |
 | 10 | **There is room for all of it at once.** At a 1456px-wide window each tab fills roughly half the viewport height and leaves 250–370px of dead space below. The information that needs five clicks to read would fit on one screen with room to spare. | observed on 0.7.1 |
 | 11 | **The page can be entirely inert and still fully interactive.** With cleanup off, every control still responds and saves — the page's own first line is "Cleanup is off … Your choices are saved until then." See §3.1: on the default Freestyle Transcribe path this banner is *wrong*, and its instruction cannot be followed. | `tone.tsx:534–542` |
-
 | 12 | **"Cleanup" names three different things on one page.** It is a tab (`tabs.cleanup`), a section eyebrow (`cleanup.eyebrow`), and an on/off toggle for the whole feature (`cleanup.toggleLabel`) — while the control the tab actually contains is called **"Strength"** (`cleanup.strengthLabel`), and the section heading renames it a fourth time to "Tidy up as I talk." So the banner can say "Cleanup is off" while the Cleanup tab shows Medium selected. Both are true; together they are incoherent. | `en.json` `tone.tabs.cleanup`, `tone.cleanup.{eyebrow,toggleLabel,strengthLabel,title}` |
 
 Defects 01–05 and 08–12 are the ones a user feels. 06–07 are cheap to fix alongside.
