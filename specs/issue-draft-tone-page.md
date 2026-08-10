@@ -5,9 +5,9 @@ has open questions this one doesn't.
 
 ## 1. Before / after
 
-| Before | After |
-|---|---|
-| ![before](URLBASE/before-index.png) | ![after](URLBASE/after-index.png) |
+| Before: Cleanup | Before: Personal | After |
+|---|---|---|
+| ![before cleanup](URLBASE/before-cleanup.png) | ![before personal](URLBASE/before-personal.png) | ![after](URLBASE/after-index.png) |
 
 Before, two facets lived in one segmented control. One is cleanup, the other is how you
 sound across apps. The redesign splits them into two sections.

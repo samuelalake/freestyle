@@ -3,14 +3,20 @@ questions that one doesn't.
 
 ## The problem
 
+![before](URLBASE/before-cleanup-custom.png)
+
 Custom is one of four Strength options, alongside Low, Medium and High. Picking it opens a
-large text box on the Tone page that pushes all four app groups off screen, for a setting
-most people never open.
+text box that grows to fit the whole prompt. With a preset loaded that makes the Tone page
+7,694px tall, so everything else on it is somewhere below the fold, for a setting most
+people never open.
 
 Low, Medium and High each show a sample of what they do. Custom can't, because it runs
 instructions only you write.
 
 ---
+
+This is also why #1 can't ship without this. #1's argument is that the root page previews
+everything at once, and an inline editor this size is what breaks that.
 
 ## What I built
 
