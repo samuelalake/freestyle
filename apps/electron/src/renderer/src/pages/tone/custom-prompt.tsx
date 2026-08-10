@@ -3,7 +3,7 @@ import { Button } from "@renderer/components/ui/button";
 import { Textarea } from "@renderer/components/ui/textarea";
 import { Check, ChevronLeft, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { Eyebrow, PageHeader, PageShell } from "../models/page-chrome";
 import { ToneStateBanner } from "./banners";
 import { useToneSettings } from "./use-tone-settings";
@@ -11,14 +11,12 @@ import { useToneSettings } from "./use-tone-settings";
 /**
  * The custom cleanup prompt, on its own page.
  *
- * This is a 160px monospace editor plus a preset dump — on the Tone index it
- * outweighed every other control on the page and pushed the four destination
- * rows below the fold, for a setting most people never touch. The index keeps
- * a preview row that links here.
+ * Inline on the index this editor outweighed every other control and pushed
+ * all four destination rows below the fold, for a setting most people never
+ * open. The index keeps a preview row that links here.
  */
 export default function ToneCustomPromptPage(): React.JSX.Element {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const settings = useToneSettings();
 
   if (settings.loading) {
@@ -51,23 +49,13 @@ export default function ToneCustomPromptPage(): React.JSX.Element {
 
         <ToneStateBanner settings={settings} />
 
+        {/* No "Reset to presets" button here. It reverted to Low without
+            saying so, while its plural label implied a choice of preset. The
+            Strength control on the index already picks between Low, Medium and
+            High, and it's one click away via the back link above. */}
         <section className="mt-7 mb-2">
-          <div className="mb-2.5 flex items-center justify-between gap-3">
-            <Eyebrow text={t("models.cleanup.promptLabel")} mono />
-            <Button
-              variant="link"
-              size="sm"
-              className="h-auto p-0"
-              onClick={() => {
-                // Going back to a preset makes this page moot — return to the
-                // index rather than leaving them editing a prompt nothing runs.
-                settings.resetToPresetMode();
-                void navigate("/settings/tone");
-              }}
-            >
-              {t("models.cleanup.resetToPresets")}
-            </Button>
-          </div>
+          <Eyebrow text={t("models.cleanup.promptLabel")} mono />
+          <div className="mt-2.5" />
           <Textarea
             value={settings.cleanupCustomPrompt}
             maxLength={CLEANUP_CUSTOM_PROMPT_MAX}
@@ -88,8 +76,14 @@ export default function ToneCustomPromptPage(): React.JSX.Element {
               variant="ink"
               size="sm"
               onClick={() => void settings.saveCleanupCustomPrompt()}
+              // Saving an empty prompt is blocked, so nobody can create the
+              // state where Custom is selected with nothing behind it. The
+              // server would silently run Low, which is not what picking
+              // "Custom" led you to expect.
               disabled={
-                settings.savingCustomPrompt || !settings.customPromptDirty
+                settings.savingCustomPrompt ||
+                !settings.customPromptDirty ||
+                !settings.cleanupCustomPrompt.trim()
               }
             >
               {settings.savingCustomPrompt ? (

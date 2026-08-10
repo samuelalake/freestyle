@@ -649,8 +649,8 @@
     "customPrompt": {
       "title": "Custom prompt",
       "subtitle": "Your own cleanup instructions, used instead of Low, Medium, or High.",
-      "emptyTitle": "No prompt yet.",
-      "emptyDesc": "Custom runs your own instructions instead of a preset. Until you write one, nothing is applied.",
+      "emptyTitle": "No prompt written yet.",
+      "emptyDesc": "Until you write one, Custom falls back to the Low preset.",
       "emptyCta": "Write a prompt",
       "edit": "Edit",
       "backToTone": "Tone",

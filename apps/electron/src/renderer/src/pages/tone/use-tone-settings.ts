@@ -275,10 +275,6 @@ export function useToneSettings() {
     }
   }, [cleanupCustomPrompt, saveSetting]);
 
-  const resetToPresetMode = useCallback(() => {
-    selectCleanupMode("low");
-  }, [selectCleanupMode]);
-
   const savePersonalTone = useCallback(
     (value: CleanupPersonalTone) => {
       setPersonalTone(value);
@@ -365,7 +361,6 @@ export function useToneSettings() {
     customPromptDirty: cleanupCustomPrompt !== savedCleanupCustomPrompt,
     savingCustomPrompt,
     saveCleanupCustomPrompt,
-    resetToPresetMode,
 
     personalTone,
     savePersonalTone,
