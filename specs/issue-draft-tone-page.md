@@ -1,7 +1,6 @@
 `ROADMAP.md` → Freestyle Core → 3️⃣ *"Improve the UI. Simplify the tones page."*
 
-Built and driven in the app. The custom prompt work is proposed separately in #2, since it
-has open questions this one doesn't.
+Built and driven in the app.
 
 ## 1. Before / after
 
@@ -9,18 +8,15 @@ has open questions this one doesn't.
 |---|---|---|
 | ![before cleanup](URLBASE/before-cleanup.png) | ![before personal](URLBASE/before-personal.png) | ![after](URLBASE/after-index.png) |
 
-Before, two facets lived in one segmented control. One is cleanup, the other is how you
-sound across apps. The redesign splits them into two sections.
+Before, two facets lived in one segmented control. One is cleanup, the other is how you sound
+across apps. The redesign splits them into two sections.
+
+"Cleanup" used to name a tab. The section is now "How much to fix" and the control is named
+"Strength" to more accurately represent what this setting does.
 
 The second section uses progressive disclosure and takes a preview-first approach. The root
-page shows every group, the apps it covers, and what it currently sounds like. Editing
-happens one level down, on the group's own page. That's the convention settings use on iOS
-and macOS.
-
-Two smaller fixes. The four option cards were laid out horizontally on one tab and vertically
-on the other four; they match now. And "Cleanup" used to name a tab, a heading, a toggle, and
-a control called "Strength". The section is now "How much to fix" and the control is
-"Strength".
+page shows every group, the apps it covers, and what it currently sounds like. Editing happens
+one level down, on the group's own page. That's the convention settings use on iOS and macOS.
 
 ---
 
@@ -31,8 +27,7 @@ a control called "Strength". The section is now "How much to fix" and the contro
 | ![row](URLBASE/after-row-personal.png) | ![personal](URLBASE/after-personal.png) |
 
 Each group gets its own page holding its four options and its app list. Choosing which apps
-belong to a group happens there. Before, that control appeared on all four tabs at once, so
-moving Discord from Personal to Work meant first working out which tab owned it.
+belong to a group happens there.
 
 The icons on the row overlap and reach a maximum size once more than five apps are added to
 the group, so the row is the same width whether a group has six apps or thirty. The last app
@@ -54,25 +49,45 @@ you'd moved to another group.
 
 ---
 
+## 4. Custom
+
+| Before | After: the row | After: the page |
+|---|---|---|
+| ![before custom](URLBASE/before-cleanup-custom.png) | ![custom row](URLBASE/after-custom-row.png) | ![custom page](URLBASE/after-custom-startfrom.png) |
+
+Custom used to open a text box that grew to fit the whole prompt. With a preset loaded that
+made the page 7,694px tall, and everything else sat below the fold.
+
+It's now `Custom…`, and selecting it takes you to its own page. The ellipsis and the jump are
+the same convention macOS and iOS use for an option that opens its own surface. Back on the
+root page, Custom shows a row with the first line of your prompt, matching the four group
+rows below it.
+
+Low, Medium and High each show a sample of what they do. Custom can't, since it runs
+instructions only you write, so it doesn't pretend to. The row says what's written and takes
+you to where you change it.
+
+The old "Reset to presets" link switched Strength back to Low and left Custom altogether. It
+never prefilled anything. It's now a **Start from a preset** menu: pick Low, Medium or High
+and that text loads into the editor as a draft you can rework, staying in Custom.
+
+---
+
 ## What's in and out
 
-**In:** the page structure, the app icons and grouping, and the wording fixes above.
+**In:** the page structure, the app icons and grouping, the custom prompt page, and the
+wording fixes above.
 
 **Out.** These are product calls, not layout ones, so I left them alone:
 
-- **The custom prompt.** Proposed separately in #2. That one should land first or alongside
-  this, since Custom's editor sitting inline is what pushes the app groups off screen.
 - **The tone words.** The four groups use twelve words across four unrelated scales. "Casual"
-  means three different things depending on the group. Collapsing them onto one scale changes
-  saved settings and needs a migration.
+  means three different things depending on the group.
 - **The defaults.** Every group ships set to "Off", so the page does nothing until you visit
   it and turn something on.
 - **One mislabelled option.** In Work, the setting saved as `friendly` displays as
   "Enthusiastic" and is described as "Upbeat and warm".
-- **The "Cleanup is off" banner.** Tone decides whether to show it from one setting. The
-  Models page treats cleanup as permanently on for Freestyle Transcribe users and disables
-  the toggle. So on the default setup Tone tells you to turn on something Models won't let
-  you touch. Out of scope here since it's a bug in how the two pages disagree, not a layout
-  question.
+- **The "Cleanup is off" banner.** Tone shows a banner saying cleanup is off and points you
+  to Models to turn it on. For Freestyle Transcribe users, Models already has it on and
+  greyed out. The banner sends you to fix something you can't change. Separate bug.
 
 Typecheck and Biome clean per `CONTRIBUTING.md`.

@@ -464,7 +464,7 @@
           "sample": "Can you send the latest version? I think the footer link is still wrong."
         },
         "custom": {
-          "title": "Custom",
+          "title": "Custom…",
           "desc": "Your own instructions.",
           "sample": "Your prompt decides how much to rewrite, tighten, or preserve."
         }
@@ -649,15 +649,10 @@
     "customPrompt": {
       "title": "Custom prompt",
       "subtitle": "Your own cleanup instructions, used instead of Low, Medium, or High.",
-      "emptyTitle": "No prompt written yet.",
-      "emptyDesc": "Until you write one, Custom falls back to the Low preset.",
-      "emptyCta": "Write a prompt",
-      "edit": "Edit",
       "backToTone": "Tone",
       "placeholder": "e.g. Fix grammar and punctuation. Keep my own wording wherever it reads clearly. Never add anything I didn’t say.",
-      "previewNote": "This preview shows the {{preset}} preset your prompt started from. Edit it to change what lands.",
-      "previewEdited": "Your prompt has been edited, so this is only an example — what lands depends on your instructions.",
-      "startFrom": "Start from a preset"
+      "startFrom": "Start from a preset",
+      "rowEmpty": "Not written yet"
     }
   },
   "models": {

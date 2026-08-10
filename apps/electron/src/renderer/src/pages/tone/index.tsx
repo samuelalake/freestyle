@@ -1,7 +1,6 @@
-import {
-  CLEANUP_PRESET_PROMPTS,
-  type CleanupAppAssignment,
-  type CleanupIntensity,
+import type {
+  CleanupAppAssignment,
+  CleanupIntensity,
 } from "@freestyle-voice/validations";
 import {
   type AppMarkId,
@@ -9,11 +8,10 @@ import {
 } from "@renderer/components/tone-previews/app-marks";
 import { CleanupPreview } from "@renderer/components/tone-previews/cleanup-preview";
 import { getVisibleBuiltinRouteIds } from "@renderer/components/tone-previews/route-ownership";
-import { Button } from "@renderer/components/ui/button";
 import { SegmentedControl } from "@renderer/components/ui/segmented-control";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Eyebrow, PageHeader, PageShell } from "../models/page-chrome";
 import { ToneStateBanner } from "./banners";
 import {
@@ -53,7 +51,7 @@ export default function TonePage(): React.JSX.Element {
           <div className="border-border bg-card mt-3 rounded-[14px] border">
             <StrengthRow settings={settings} />
             {settings.cleanupIntensity === "custom" ? (
-              <CustomPreviewRow settings={settings} />
+              <CustomRow settings={settings} />
             ) : (
               <StrengthPreviewRow value={settings.cleanupIntensity} />
             )}
@@ -88,6 +86,8 @@ function StrengthRow({
   settings: ToneSettings;
 }): React.JSX.Element {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
       <div className="min-w-0">
@@ -101,9 +101,15 @@ function StrengthRow({
       <SegmentedControl
         size="sm"
         value={settings.cleanupIntensity}
-        onValueChange={(value) =>
-          settings.selectCleanupMode(value as CleanupIntensity)
-        }
+        onValueChange={(value) => {
+          const next = value as CleanupIntensity;
+          settings.selectCleanupMode(next);
+          // "Custom…" opens its own surface, the way an ellipsis option does in
+          // macOS and iOS. Picking it means nothing until a prompt exists, so
+          // going straight there beats landing back on a page that can't show
+          // you what you just chose.
+          if (next === "custom") void navigate(CUSTOM_PROMPT_PATH);
+        }}
         options={CLEANUP_OPTIONS.map((option) => ({
           value: option.value,
           label: t(option.titleKey),
@@ -143,97 +149,44 @@ function StrengthPreviewRow({
 }
 
 /**
- * Which preset a custom prompt is still identical to, if any.
+ * Custom shows a navigation row, not a preview.
  *
- * Selecting Custom seeds the prompt from the preset you were on, so until it's
- * edited we know exactly what it does and can show that preset's sample. Once
- * it diverges we can't preview it without running the model, and say so.
+ * Low, Medium and High can each show a sample because we know what they do.
+ * Custom runs instructions only the user writes, so any sample here would be
+ * invented. Earlier drafts tried a seeded sample, a tooltip naming the preset
+ * it came from, and a generic fallback line, all of them covering for a preview
+ * that shouldn't exist. A row that says what's written and takes you to the
+ * editor is the same pattern the four app groups use below.
  */
-function presetBehind(prompt: string): "low" | "medium" | "high" | null {
-  for (const key of ["low", "medium", "high"] as const) {
-    if (CLEANUP_PRESET_PROMPTS[key].trim() === prompt) return key;
-  }
-  return null;
-}
-
-/**
- * Custom keeps the presets' preview shape: "What lands" shows a *result*, not
- * the instruction that produced it. The prompt itself lives on its own page,
- * one click away via Edit.
- */
-function CustomPreviewRow({
+function CustomRow({
   settings,
 }: {
   settings: ToneSettings;
 }): React.JSX.Element {
   const { t } = useTranslation();
-  // The *stored* prompt, not the draft — the index should reflect what will
-  // actually run, not what someone is part-way through typing on another page.
+  // The *stored* prompt, not the draft — this should reflect what will actually
+  // run, not what someone is part-way through typing on the other page.
   const prompt = settings.savedCleanupCustomPrompt.trim();
-  const seededFrom = presetBehind(prompt);
-  const sample = seededFrom
-    ? t(`tone.cleanup.cards.${seededFrom}.sample`)
-    : t("tone.cleanup.cards.custom.sample");
-  const note = seededFrom
-    ? t("tone.customPrompt.previewNote", {
-        preset: t(`tone.cleanup.cards.${seededFrom}.title`),
-      })
-    : t("tone.customPrompt.previewEdited");
+  const firstLine = prompt.split("\n").find((line) => line.trim()) ?? "";
 
   return (
-    <div className="border-border/70 grid gap-5 border-t px-5 py-4 min-[720px]:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] min-[720px]:gap-8">
-      <div>
-        <Eyebrow text={t("tone.cleanup.preview.rawLabel")} />
-        <p className="text-muted-foreground mt-2 text-[13px] leading-[1.6]">
-          {t("tone.cleanup.preview.rawSample")}
+    <Link
+      to={CUSTOM_PROMPT_PATH}
+      className="hover:bg-accent/35 focus-visible:ring-ring/40 border-border/70 flex items-center justify-between gap-4 border-t px-5 py-3.5 transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
+    >
+      <div className="min-w-0">
+        <p className="text-foreground text-[13.5px] font-medium">
+          {t("tone.customPrompt.title")}
+        </p>
+        <p className="text-muted-foreground mt-0.5 truncate text-[12px] leading-[1.5]">
+          {prompt ? firstLine : t("tone.customPrompt.rowEmpty")}
         </p>
       </div>
-      <div className="min-[720px]:border-border/60 min-[720px]:border-l min-[720px]:pl-8">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <Eyebrow text={t("tone.cleanup.preview.resultLabel")} accent />
-          <div className="flex items-center gap-2">
-            <Eyebrow text={t("tone.cleanup.cards.custom.title")} />
-            {prompt ? (
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="h-6 px-2 text-[11px]"
-              >
-                <Link to={CUSTOM_PROMPT_PATH}>
-                  {t("tone.customPrompt.edit")}
-                </Link>
-              </Button>
-            ) : null}
-          </div>
-        </div>
-        {prompt ? (
-          <>
-            <CleanupPreview result={sample} selected={false} />
-            {/* Visible, not a tooltip. Which preset the sample belongs to is
-                the difference between an accurate preview and a misleading
-                one, so it can't hide behind hover. */}
-            <p className="text-muted-foreground mt-2 text-[11px] leading-[1.5]">
-              {note}
-            </p>
-          </>
-        ) : (
-          <div className="border-border/70 rounded-[10px] border border-dashed px-3.5 py-3.5">
-            <p className="text-foreground text-[12.5px] font-medium">
-              {t("tone.customPrompt.emptyTitle")}
-            </p>
-            <p className="text-muted-foreground mt-1 text-[11.5px] leading-[1.55]">
-              {t("tone.customPrompt.emptyDesc")}
-            </p>
-            <Button asChild variant="ink" size="sm" className="mt-3">
-              <Link to={CUSTOM_PROMPT_PATH}>
-                {t("tone.customPrompt.emptyCta")}
-              </Link>
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
+      <ChevronRight
+        className="text-muted-foreground size-4 shrink-0"
+        aria-hidden="true"
+      />
+    </Link>
   );
 }
 
