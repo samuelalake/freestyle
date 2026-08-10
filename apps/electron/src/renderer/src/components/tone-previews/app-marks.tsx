@@ -475,3 +475,97 @@ export function AppMarkRow({
     </div>
   );
 }
+
+/**
+ * Overlapping stack of app marks \u2014 the facepile used on the Tone index rows.
+ *
+ * Unlike `AppMarkRow` (which lays marks out flat and needs a caption line to
+ * name them) this stays a fixed-ish width no matter how many apps route to a
+ * destination, so a row with nine apps doesn't push its trailing value off the
+ * edge. Overflow collapses into the leading mark: with `max = 3` and five apps
+ * you get three slots, the first carrying a "+2" scrim.
+ *
+ * Marks are stacked leading-on-top so the scrim is never the obscured one.
+ * Every mark keeps its own `title`, and the leading one names what it hides,
+ * so the labels `AppMarkRow` prints below are still reachable on hover.
+ */
+export function AppMarkStack({
+  ids,
+  assignments = [],
+  size = 22,
+  max = 3,
+  dimmed,
+  className,
+}: {
+  ids: readonly AppMarkId[];
+  assignments?: readonly CleanupAppAssignment[];
+  size?: number;
+  max?: number;
+  dimmed?: boolean;
+  className?: string;
+}): React.JSX.Element | null {
+  const entries = [
+    ...ids.map((id) => ({ key: id, id, label: APP_MARKS[id].label }) as const),
+    ...assignments.map((assignment) => ({
+      key: `${assignment.kind}:${assignment.match}`,
+      assignment,
+      label: assignment.label,
+    })),
+  ];
+
+  if (entries.length === 0) return null;
+
+  const visible = entries.slice(0, max);
+  const hidden = entries.slice(max);
+
+  // The "+N" is its own leading slot rather than a scrim over one of the
+  // visible marks. Overlaying it on a real icon makes the badge lie: with four
+  // apps and max = 3 it would read "+1" while *two* apps were unreadable \u2014 the
+  // one it covers and the one it counts. Giving it a slot keeps N equal to the
+  // number of apps you genuinely cannot see. It still renders as an app icon
+  // (the first hidden one) under a scrim, so the stack reads as one piece.
+  const slots = [
+    ...(hidden.length > 0
+      ? [{ ...hidden[0]!, key: "overflow", overflow: hidden.length }]
+      : []),
+    ...visible.map((entry) => ({ ...entry, overflow: 0 })),
+  ];
+  const hiddenLabel = hidden.map((entry) => entry.label).join(", ");
+
+  return (
+    <div
+      className={cn(
+        "flex items-center transition-opacity duration-150",
+        // Routed but silent \u2014 the apps still belong here, nothing happens in
+        // them. Dimming is the only at-a-glance difference between the two.
+        dimmed && "opacity-50",
+        className,
+      )}
+    >
+      {slots.map((slot, index) => (
+        <span
+          key={slot.key}
+          className={cn("relative inline-flex", index > 0 && "-ml-2")}
+          // Leading slot on top, so the "+N" scrim is never half-covered.
+          style={{ zIndex: slots.length - index }}
+          title={slot.overflow ? hiddenLabel : slot.label}
+        >
+          <RouteMark
+            id={"id" in slot ? slot.id : undefined}
+            assignment={"assignment" in slot ? slot.assignment : undefined}
+            size={size}
+            className="ring-card ring-2"
+          />
+          {slot.overflow ? (
+            <span
+              aria-hidden="true"
+              className="bg-foreground/70 text-background absolute inset-0 flex items-center justify-center rounded-[8px] text-[10px] leading-none font-semibold tabular-nums"
+            >
+              +{slot.overflow}
+            </span>
+          ) : null}
+        </span>
+      ))}
+    </div>
+  );
+}

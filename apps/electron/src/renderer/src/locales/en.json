@@ -638,9 +638,8 @@
       "howMuchToFix": "How much to fix",
       "howYouSound": "How you sound",
       "voice": "Voice",
-      "apps": "Apps that sound {{destination}}",
-      "appsFallbackLabel": "Apps",
-      "appsFallback": "Anything that isn't listed on the other three pages lands here. There's nothing to add."
+      "appsFallback": "Anything that isn’t listed on the other three pages lands here. There’s nothing to add.",
+      "whereUsed": "Where it’s used"
     },
     "strength": {
       "desc": "Applies everywhere, in every app."

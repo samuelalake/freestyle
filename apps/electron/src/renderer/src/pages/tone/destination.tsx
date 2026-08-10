@@ -54,14 +54,10 @@ function DestinationBody({
 }): React.JSX.Element {
   const { t } = useTranslation();
   const value = destinationValue(meta, settings);
-  const { appIds } = useDestinationSummary(meta, settings);
+  const { appIds, assignments } = useDestinationSummary(meta, settings);
 
   const active =
     meta.options.find((option) => option.value === value) ?? meta.options[0]!;
-
-  const assignments = settings.assignments.filter(
-    (a) => a.destination === meta.destination,
-  );
 
   return (
     <PageShell>
@@ -118,12 +114,7 @@ function DestinationBody({
 
         {meta.canManageRoutes ? (
           <section className="mt-7 mb-2">
-            <Eyebrow
-              text={t("tone.sections.apps", {
-                destination: t(`tone.${meta.group}.rowTitle`),
-              })}
-              mono
-            />
+            <Eyebrow text={t("tone.sections.whereUsed")} mono />
             <div className="border-border bg-card mt-3 rounded-[14px] border px-5 py-4">
               <AppMarkRow
                 ids={appIds}
@@ -143,7 +134,7 @@ function DestinationBody({
           </section>
         ) : (
           <section className="mt-7 mb-2">
-            <Eyebrow text={t("tone.sections.appsFallbackLabel")} mono />
+            <Eyebrow text={t("tone.sections.whereUsed")} mono />
             <p className="text-muted-foreground mt-3 text-[12.5px] leading-[1.55]">
               {t("tone.sections.appsFallback")}
             </p>

@@ -1,11 +1,11 @@
 import {
   CLEANUP_CUSTOM_PROMPT_MAX,
+  type CleanupAppAssignment,
   type CleanupIntensity,
 } from "@freestyle-voice/validations";
 import {
   type AppMarkId,
-  AppMarkRow,
-  getAppMarkLabel,
+  AppMarkStack,
 } from "@renderer/components/tone-previews/app-marks";
 import { CleanupPreview } from "@renderer/components/tone-previews/cleanup-preview";
 import { getVisibleBuiltinRouteIds } from "@renderer/components/tone-previews/route-ownership";
@@ -209,13 +209,19 @@ function CustomPromptRow({
 export function useDestinationSummary(
   meta: DestinationMeta,
   settings: ToneSettings,
-): { toneLabel: string; isOff: boolean; appIds: AppMarkId[]; apps: string[] } {
+): {
+  toneLabel: string;
+  isOff: boolean;
+  appIds: AppMarkId[];
+  assignments: CleanupAppAssignment[];
+} {
   const { t } = useTranslation();
 
   const value = destinationValue(meta, settings);
   const active =
     meta.options.find((option) => option.value === value) ?? meta.options[0]!;
 
+  // Which built-ins still belong here, after everything the user has moved.
   const appIds = meta.canManageRoutes
     ? getVisibleBuiltinRouteIds(
         meta.destination as "personal" | "work" | "email",
@@ -223,18 +229,13 @@ export function useDestinationSummary(
       )
     : [];
 
-  const apps = [
-    ...appIds.map(getAppMarkLabel),
-    ...settings.assignments
-      .filter((a) => a.destination === meta.destination)
-      .map((a) => a.label),
-  ];
-
   return {
     toneLabel: t(active.titleKey),
     isOff: active.value === "off",
     appIds,
-    apps,
+    assignments: settings.assignments.filter(
+      (a) => a.destination === meta.destination,
+    ),
   };
 }
 
@@ -264,21 +265,16 @@ function DestinationRow({
   first: boolean;
 }): React.JSX.Element {
   const { t } = useTranslation();
-  const { toneLabel, isOff, appIds, apps } = useDestinationSummary(
+  const { toneLabel, isOff, appIds, assignments } = useDestinationSummary(
     meta,
     settings,
   );
-
-  // Named apps when we have them; otherwise say what the fallback catches.
-  const appsSummary = meta.canManageRoutes
-    ? apps.join(", ")
-    : t("tone.apps.anyUnlisted");
 
   return (
     <Link
       to={destinationPath(meta.slug)}
       className={
-        "hover:bg-accent/35 focus-visible:ring-ring/40 flex items-center justify-between gap-4 px-5 py-3.5 transition-colors focus-visible:ring-[3px] focus-visible:outline-none" +
+        "hover:bg-accent/35 focus-visible:ring-ring/40 flex items-center justify-between gap-4 px-5 py-3 transition-colors focus-visible:ring-[3px] focus-visible:outline-none" +
         (first ? "" : " border-border/70 border-t")
       }
     >
@@ -286,17 +282,32 @@ function DestinationRow({
         <p className="text-foreground text-[13.5px] font-medium">
           {t(`tone.${meta.group}.rowTitle`)}
         </p>
-        <p className="text-muted-foreground mt-0.5 truncate text-[12px] leading-[1.5]">
-          <span className={isOff ? "italic" : "text-foreground font-medium"}>
-            {t("tone.row.sounds", { tone: toneLabel })}
-          </span>
-          {appsSummary ? ` · ${appsSummary}` : null}
-        </p>
+        {meta.canManageRoutes ? (
+          <AppMarkStack
+            ids={appIds}
+            assignments={assignments}
+            size={24}
+            dimmed={isOff}
+            className="mt-1.5"
+          />
+        ) : (
+          <p className="text-muted-foreground mt-1 text-[12px] leading-[1.5]">
+            {t("tone.apps.anyUnlisted")}
+          </p>
+        )}
       </div>
-      <div className="flex shrink-0 items-center gap-3">
-        {appIds.length > 0 ? (
-          <AppMarkRow ids={appIds} size={20} className="hidden sm:block" />
-        ) : null}
+      {/* The value is the answer to "what does this row do" — it belongs where
+          the eye lands on a settings row, not buried in a prose subtitle. */}
+      <div className="flex shrink-0 items-center gap-2">
+        <span
+          className={
+            isOff
+              ? "text-muted-foreground text-[13px]"
+              : "text-foreground text-[13px] font-medium"
+          }
+        >
+          {toneLabel}
+        </span>
         <ChevronRight
           className="text-muted-foreground size-4"
           aria-hidden="true"
