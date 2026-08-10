@@ -88,8 +88,9 @@ it is a bug rather than a design change.
 Rather than invent a shape, I opened the two closest competitors — both dictation apps
 solving the same problem — and Apple's own answer to per-app overrides.
 
-**superwhisper — "Modes".** The direct analogue of destination tones. Its answer is a **flat
-list you drill into**, not a tab strip: every mode is visible at once, with `+ Create mode`
+**superwhisper — "Modes".** The direct analogue of destination tones, and the single closest
+reference: same product category, same problem. Its answer is a **flat list you drill into**,
+not a tab strip: every mode is visible at once, with `+ Create mode`
 to add one. Inside a mode, settings are grouped `label → right-aligned control` rows —
 Preset, Language, Voice Model — and crucially **"Activate for apps" lives inside the mode it
 applies to**, so routing is never scattered. Rarely-used settings sit behind a collapsed
@@ -141,69 +142,91 @@ Worth noting for the separate hotkey issue: Wispr Flow renders modifiers as **gl
 word** (`^ Ctrl`, `⌥ Opt`) in both its home screen and its settings — shipping precedent in
 the same product category for the legibility fix.
 
-## 5. Proposal — one page, two sections, no tabs
+## 5. Proposal — an index, and a page per destination
 
-The page becomes a single scrolling column at the standard ~760px measure,
-following the page rhythm in `DESIGN.md` §7: title → one muted sentence → card →
-`mt-7` + mono eyebrow per section.
+**A click should be how you change a setting, not how you find out what it is.**
 
-### 5.1 `HOW MUCH TO FIX` — cleanup intensity
+That single sentence is the whole redesign. Today the tab strip charges one click to *read*
+Personal's tone — and reading is the frequent act, editing the rare one. The page optimises
+the wrong one. So: an index that shows every value at once, and a page behind each
+destination where the editing happens.
 
-The existing `CleanupTonePanel` moves up as its own section, unchanged in
-behaviour: Low / Medium / High / Custom, with the custom-prompt textarea
-revealed under Custom. This is the only setting that already has a non-`off`
-default (`medium`) and the only one that applies everywhere — it earns the top
-slot and it stops pretending to be a peer of "Email" (defect 04).
+Both surfaces follow the page rhythm in `DESIGN.md` §7: title → one muted sentence → card →
+`mt-7` + mono eyebrow per section, at the standard ~760px measure.
 
-### 5.2 `HOW YOU SOUND` — four surfaces, each owning its own apps
+This replaces an earlier draft of this section that flattened everything onto one page. Two
+things were wrong with it, and they're worth recording because the second one is the reason
+this design has two surfaces instead of one:
 
-Four rows in one `Card`, hairline-divided. Each row is two lines — the name and a
-`SegmentedControl` (defect 07) on top, that group's apps beneath:
+- **A destination is three things, not two.** A voice, a set of apps, *and a preview of the
+  result*. The first two fit on a row; the preview never did. The flat draft fudged it as
+  "one shared preview below the rows that reflects the row you last touched" — an ambiguous,
+  stateful control that answers "preview of what?" with "whatever you touched last."
+- **All four reference apps drill down, and the draft dropped that.** §4 recorded
+  superwhisper's "flat list you drill into" and macOS's per-row chevrons, then proposed a
+  design with no navigation at all. The row pattern was taken; the thing that makes it work
+  was not.
+
+### 5.1 The index — `HOW MUCH TO FIX`, editable in place
+
+Strength keeps its `SegmentedControl` (defect 07) directly on the index, with the
+custom-prompt textarea revealed under Custom and the before/after preview beneath it. It
+earns that slot for the reason macOS keeps its globals inline: it is the only setting that
+applies everywhere, and the only one with a real default (`medium`). It also stops
+pretending to be a peer of "Email" (defects 04, 12).
+
+### 5.2 The index — `HOW YOU SOUND`, four rows that read their own state
+
+Four rows in one `Card`, hairline-divided. Each carries its name, its current value in
+words, its routed apps, and a chevron:
 
 ```
-Personal                              [ Off | Casual | Polished | Very casual ]
-  ⬚ Messages   ⬚ WhatsApp   ⬚ Telegram        + Add app or site
+Personal                                                   ⬚⬚⬚   ›
+  Sounds Casual · Messages, WhatsApp, Telegram
 
-Work                                  [ Off | Direct | Enthusiastic | Formal ]
-  ⬚ Slack   ⬚ LinkedIn   ⬚ Discord   ⬚ notion.so    + Add app or site
+Work                                                      ⬚⬚⬚⬚   ›
+  Sounds Enthusiastic · Slack, LinkedIn, Discord, notion.so
 
-Email                                 [ Off | Casual | Warm | Formal ]
-  ⬚ Gmail   ⬚ Outlook   ⬚ Apple Mail   ⬚ Proton     + Add app or site
+Email                                                     ⬚⬚⬚⬚   ›
+  Sounds Warm · Gmail, Outlook, Apple Mail, Proton
 
-Everywhere else                       [ Off | Casual | Neutral | Professional ]
-  Anything not listed above — no need to add apps here.
+Everywhere else                                                   ›
+  Sounds Off — clean text, no styling · anything not listed above
 ```
 
-**Routing lives on the row, not in a separate section.** An earlier draft of this spec
-pulled all assignments into one "Exceptions" table at the bottom, borrowing Chrome's
-"Default behavior / Customized behaviors" framing. That was wrong on two counts:
+The whole configuration is now readable without a click (defects 03, 08, 10). `Off` reads as
+the words "Off — clean text, no styling" rather than an unticked radio a tab away, which is
+what made defect 02 invisible.
 
-- **The model doesn't map.** Chrome has one default and sites that deviate from it.
-  Freestyle has four groups and every app belongs to exactly one — membership, not
-  deviation. "Exceptions" imports a mental model the feature doesn't have.
-- **It made the common action worse.** Adding an app to Work went from "you're looking at
-  Work, press +" to "scroll to another section, press add, then pick Work from a dropdown."
-  Two decisions where there was one. The current tabbed page gets this part right, and
-  superwhisper agrees — its "Activate for apps" sits inside the mode it applies to.
+### 5.3 The destination page
 
-So the existing per-destination `AppAssignments` behaviour is kept; it just renders on a row
-instead of inside a tab panel, and all four are visible simultaneously (defects 03, 05).
+One page per destination, reached from its row. Same layout for all four:
 
-`+ Add app or site` opens a popover anchored to its row. The destination is already implied
-by which row was clicked, so there is no destination picker. Because an app belongs to
-exactly one group, an app already assigned elsewhere shows its current group inline
-("Currently Personal") and choosing it **moves** it. That is the one job
+- **`VOICE`** — the four options in the existing card layout, one layout everywhere,
+  including Strength (defect 09).
+- **`PREVIEW`** — raw transcript beside the result. Because the page knows its destination,
+  the heading can name the actual app: *"What lands in Messages."* The shared preview on a
+  flat page could never do that.
+- **`APPS THAT SOUND {DESTINATION}`** — the existing `AppAssignments` chips plus
+  `+ Add app or site`.
+
+Routing stays per-destination, which is what the current tabbed page gets right and what
+superwhisper does ("Activate for apps" lives inside the mode). `+ Add app or site` opens a
+picker with **no destination dropdown** — the page you are on already decided that. Because
+an app belongs to exactly one group, one already assigned elsewhere shows its current group
+inline ("Currently Work") and choosing it **moves** it. That is the one job
 `route-ownership.ts` keeps; per-tab visibility filtering (`getVisibleBuiltinRouteIds`) goes
-away. Chips carry an `×` on hover; removing a built-in returns it to Everywhere else rather
-than deleting it.
+away (defect 05). Chips carry an `×` on hover; removing a built-in returns it to Everywhere
+else rather than deleting it.
 
-Preview stays, but as **one** panel below the rows that reflects the row you last
-touched — instead of five previews mounted in five tabs. Same preview components,
-one mount point.
+### 5.4 What this removes
 
-This kills the tab strip, `ToneTab`, `isToneTab`, and the per-tab `TabsContent` wiring.
+The tab strip, `ToneTab`, `isToneTab`, the per-tab `TabsContent` wiring, and the two banner
+variants. `AppAssignments` and the five preview components are kept as-is and re-mounted —
+four of them now on their own routes rather than in tab panels. Net: one index component,
+one parameterised destination component, no tab machinery.
 
-### 5.3 Defaults
+### 5.5 Defaults
 
 Ship a non-`off` default so the page means something on first visit (defect 02).
 Recommended: `overall: "neutral"`, the other three `off` — i.e. Freestyle has a
