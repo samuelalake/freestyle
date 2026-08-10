@@ -464,7 +464,7 @@
           "sample": "Can you send the latest version? I think the footer link is still wrong."
         },
         "custom": {
-          "title": "Custom…",
+          "title": "Custom",
           "desc": "Your own instructions.",
           "sample": "Your prompt decides how much to rewrite, tighten, or preserve."
         }

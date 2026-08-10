@@ -58,8 +58,8 @@ you'd moved to another group.
 Custom used to open a text box that grew to fit the whole prompt. With a preset loaded that
 made the page 7,694px tall, and everything else sat below the fold.
 
-It's now `Custom…`, and selecting it takes you to its own page with the instructions of your
-last preset pre-filled. That pre-fill only happens the first time, when you have nothing
+Selecting Custom now takes you to its own page, with the instructions of your last preset
+pre-filled. That pre-fill only happens the first time, when you have nothing
 written; after that your own prompt is what you come back to. Back on the root page, Custom
 shows a row with the first line of your prompt.
 

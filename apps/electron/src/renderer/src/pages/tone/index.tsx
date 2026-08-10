@@ -104,10 +104,9 @@ function StrengthRow({
         onValueChange={(value) => {
           const next = value as CleanupIntensity;
           settings.selectCleanupMode(next);
-          // "Custom…" opens its own surface, the way an ellipsis option does in
-          // macOS and iOS. Picking it means nothing until a prompt exists, so
-          // going straight there beats landing back on a page that can't show
-          // you what you just chose.
+          // Custom means nothing until a prompt exists, so go straight to the
+          // editor rather than landing back on a page that can't show you what
+          // you just picked.
           if (next === "custom") void navigate(CUSTOM_PROMPT_PATH);
         }}
         options={CLEANUP_OPTIONS.map((option) => ({
