@@ -1,4 +1,5 @@
 import {
+  CLEANUP_PRESET_PROMPTS,
   type CleanupAppAssignment,
   type CleanupEmailTone,
   type CleanupIntensity,
@@ -231,18 +232,34 @@ export function useToneSettings() {
   const selectCleanupMode = useCallback(
     (next: CleanupIntensity) => {
       // Enablement lives on the Models page now — this only picks the strength.
-      //
-      // Picking "custom" deliberately does NOT seed the editor with the current
-      // preset's text. It used to, and that was a trap: the seed was only ever
-      // local draft state, so you'd see a full prompt, assume it was live, and
-      // have nothing stored until you pressed Save. Starting empty makes the
-      // index's empty state tell the truth about what will run.
       setCleanupIntensity(next);
       saveSetting(SETTINGS_KEYS.cleanupIntensity, next).catch((err) =>
         console.error("Failed to save cleanup strength:", err),
       );
+
+      // Switching to custom with nothing written yet seeds the editor from the
+      // preset you were on, so you start by editing something that works rather
+      // than facing a blank page.
+      //
+      // The seed is *saved*, not left as a draft. It used to be draft-only,
+      // which meant you saw a full prompt, assumed it was live, and had nothing
+      // stored until you pressed Save. Persisting it keeps what's shown and
+      // what runs the same thing — and lets the preview show the sample for the
+      // preset the prompt came from, since at that point they're identical.
+      if (
+        next !== "custom" ||
+        cleanupIntensity === "custom" ||
+        savedCleanupCustomPrompt.trim()
+      ) {
+        return;
+      }
+      const seed = CLEANUP_PRESET_PROMPTS[cleanupIntensity];
+      setCleanupCustomPrompt(seed);
+      saveSetting(SETTINGS_KEYS.cleanupCustomPrompt, seed)
+        .then(() => setSavedCleanupCustomPrompt(seed))
+        .catch((err) => console.error("Failed to seed custom prompt:", err));
     },
-    [saveSetting],
+    [cleanupIntensity, savedCleanupCustomPrompt, saveSetting],
   );
 
   const saveCleanupCustomPrompt = useCallback(async () => {

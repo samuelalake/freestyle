@@ -1,6 +1,7 @@
-import type {
-  CleanupAppAssignment,
-  CleanupIntensity,
+import {
+  CLEANUP_PRESET_PROMPTS,
+  type CleanupAppAssignment,
+  type CleanupIntensity,
 } from "@freestyle-voice/validations";
 import {
   type AppMarkId,
@@ -10,6 +11,11 @@ import { CleanupPreview } from "@renderer/components/tone-previews/cleanup-previ
 import { getVisibleBuiltinRouteIds } from "@renderer/components/tone-previews/route-ownership";
 import { Button } from "@renderer/components/ui/button";
 import { SegmentedControl } from "@renderer/components/ui/segmented-control";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@renderer/components/ui/tooltip";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -142,10 +148,23 @@ function StrengthPreviewRow({
 }
 
 /**
- * Custom keeps the preview shape of the presets, but there is no sample to
- * show — what lands depends on a prompt only the user can write. So the result
- * column holds either the stored prompt (with a way in to edit it) or an empty
- * state that says plainly that nothing is being applied yet.
+ * Which preset a custom prompt is still identical to, if any.
+ *
+ * Selecting Custom seeds the prompt from the preset you were on, so until it's
+ * edited we know exactly what it does and can show that preset's sample. Once
+ * it diverges we can't preview it without running the model, and say so.
+ */
+function presetBehind(prompt: string): "low" | "medium" | "high" | null {
+  for (const key of ["low", "medium", "high"] as const) {
+    if (CLEANUP_PRESET_PROMPTS[key].trim() === prompt) return key;
+  }
+  return null;
+}
+
+/**
+ * Custom keeps the presets' preview shape: "What lands" shows a *result*, not
+ * the instruction that produced it. The prompt itself lives on its own page,
+ * one click away via Edit.
  */
 function CustomPreviewRow({
   settings,
@@ -156,6 +175,15 @@ function CustomPreviewRow({
   // The *stored* prompt, not the draft — the index should reflect what will
   // actually run, not what someone is part-way through typing on another page.
   const prompt = settings.savedCleanupCustomPrompt.trim();
+  const seededFrom = presetBehind(prompt);
+  const sample = seededFrom
+    ? t(`tone.cleanup.cards.${seededFrom}.sample`)
+    : t("tone.cleanup.cards.custom.sample");
+  const note = seededFrom
+    ? t("tone.customPrompt.previewNote", {
+        preset: t(`tone.cleanup.cards.${seededFrom}.title`),
+      })
+    : t("tone.customPrompt.previewEdited");
 
   return (
     <div className="border-border/70 grid gap-5 border-t px-5 py-4 min-[720px]:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] min-[720px]:gap-8">
@@ -171,25 +199,31 @@ function CustomPreviewRow({
           <div className="flex items-center gap-2">
             <Eyebrow text={t("tone.cleanup.cards.custom.title")} />
             {prompt ? (
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="h-6 px-2 text-[11px]"
-              >
-                <Link to={CUSTOM_PROMPT_PATH}>
-                  {t("tone.customPrompt.edit")}
-                </Link>
-              </Button>
+              // The tooltip is what makes the preview honest: it says which
+              // preset the sample belongs to (or that an edited prompt can't be
+              // previewed) and sends you to the editor to change it.
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="h-6 px-2 text-[11px]"
+                  >
+                    <Link to={CUSTOM_PROMPT_PATH}>
+                      {t("tone.customPrompt.edit")}
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[260px]">
+                  {note}
+                </TooltipContent>
+              </Tooltip>
             ) : null}
           </div>
         </div>
         {prompt ? (
-          <div className="border-border/70 bg-secondary/40 rounded-[10px] border px-3.5 py-3">
-            <p className="mono text-muted-foreground line-clamp-3 text-[11.5px] leading-[1.6]">
-              {prompt}
-            </p>
-          </div>
+          <CleanupPreview result={sample} selected={false} />
         ) : (
           <div className="border-border/70 rounded-[10px] border border-dashed px-3.5 py-3.5">
             <p className="text-foreground text-[12.5px] font-medium">
