@@ -631,14 +631,13 @@
         }
       },
       "rowTitle": "Everywhere else",
-      "pageSubtitle": "How Freestyle sounds anywhere that is not a chat or an email.",
+      "pageSubtitle": "Used in every app that isn’t listed under Personal, Work, or Email.",
       "resultLabel": "What lands"
     },
     "sections": {
       "howMuchToFix": "How much to fix",
-      "howYouSound": "How you sound",
+      "howYouSound": "How you sound across apps",
       "voice": "Voice",
-      "appsFallback": "Anything that isn’t listed on the other three pages lands here. There’s nothing to add.",
       "whereUsed": "Where it’s used"
     },
     "strength": {
@@ -646,6 +645,16 @@
     },
     "row": {
       "sounds": "Sounds {{tone}}"
+    },
+    "customPrompt": {
+      "title": "Custom prompt",
+      "subtitle": "Your own cleanup instructions, used instead of Low, Medium, or High.",
+      "emptyTitle": "No prompt yet.",
+      "emptyDesc": "Custom runs your own instructions instead of a preset. Until you write one, nothing is applied.",
+      "emptyCta": "Write a prompt",
+      "edit": "Edit",
+      "backToTone": "Tone",
+      "placeholder": "e.g. Fix grammar and punctuation. Keep my own wording wherever it reads clearly. Never add anything I didn’t say."
     }
   },
   "models": {

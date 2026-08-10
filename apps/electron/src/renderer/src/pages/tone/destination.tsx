@@ -112,6 +112,9 @@ function DestinationBody({
           </div>
         </section>
 
+        {/* The fallback destination has nothing to route — it is defined as
+            whatever the other three don't claim — so it gets no section here.
+            Its subtitle carries the explanation instead. */}
         {meta.canManageRoutes ? (
           <section className="mt-7 mb-2">
             <Eyebrow text={t("tone.sections.whereUsed")} mono />
@@ -132,14 +135,7 @@ function DestinationBody({
               />
             </div>
           </section>
-        ) : (
-          <section className="mt-7 mb-2">
-            <Eyebrow text={t("tone.sections.whereUsed")} mono />
-            <p className="text-muted-foreground mt-3 text-[12.5px] leading-[1.55]">
-              {t("tone.sections.appsFallback")}
-            </p>
-          </section>
-        )}
+        ) : null}
       </div>
     </PageShell>
   );

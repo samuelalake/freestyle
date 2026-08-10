@@ -1,7 +1,6 @@
-import {
-  CLEANUP_CUSTOM_PROMPT_MAX,
-  type CleanupAppAssignment,
-  type CleanupIntensity,
+import type {
+  CleanupAppAssignment,
+  CleanupIntensity,
 } from "@freestyle-voice/validations";
 import {
   type AppMarkId,
@@ -11,14 +10,14 @@ import { CleanupPreview } from "@renderer/components/tone-previews/cleanup-previ
 import { getVisibleBuiltinRouteIds } from "@renderer/components/tone-previews/route-ownership";
 import { Button } from "@renderer/components/ui/button";
 import { SegmentedControl } from "@renderer/components/ui/segmented-control";
-import { Textarea } from "@renderer/components/ui/textarea";
-import { Check, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Eyebrow, PageHeader, PageShell } from "../models/page-chrome";
 import { ToneStateBanner } from "./banners";
 import {
   CLEANUP_OPTIONS,
+  CUSTOM_PROMPT_PATH,
   DESTINATIONS,
   type DestinationMeta,
   destinationPath,
@@ -53,7 +52,7 @@ export default function TonePage(): React.JSX.Element {
           <div className="border-border bg-card mt-3 rounded-[14px] border">
             <StrengthRow settings={settings} />
             {settings.cleanupIntensity === "custom" ? (
-              <CustomPromptRow settings={settings} />
+              <CustomPreviewRow settings={settings} />
             ) : (
               <StrengthPreviewRow value={settings.cleanupIntensity} />
             )}
@@ -142,60 +141,70 @@ function StrengthPreviewRow({
   );
 }
 
-function CustomPromptRow({
+/**
+ * Custom keeps the preview shape of the presets, but there is no sample to
+ * show — what lands depends on a prompt only the user can write. So the result
+ * column holds either the stored prompt (with a way in to edit it) or an empty
+ * state that says plainly that nothing is being applied yet.
+ */
+function CustomPreviewRow({
   settings,
 }: {
   settings: ToneSettings;
 }): React.JSX.Element {
   const { t } = useTranslation();
+  // The *stored* prompt, not the draft — the index should reflect what will
+  // actually run, not what someone is part-way through typing on another page.
+  const prompt = settings.savedCleanupCustomPrompt.trim();
+
   return (
-    <div className="border-border/70 border-t px-5 py-4">
-      <div className="mb-2.5 flex items-center justify-between gap-3">
-        <Eyebrow text={t("models.cleanup.promptLabel")} />
-        <Button
-          variant="link"
-          size="sm"
-          className="h-auto p-0"
-          onClick={settings.resetToPresetMode}
-        >
-          {t("models.cleanup.resetToPresets")}
-        </Button>
+    <div className="border-border/70 grid gap-5 border-t px-5 py-4 min-[720px]:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] min-[720px]:gap-8">
+      <div>
+        <Eyebrow text={t("tone.cleanup.preview.rawLabel")} />
+        <p className="text-muted-foreground mt-2 text-[13px] leading-[1.6]">
+          {t("tone.cleanup.preview.rawSample")}
+        </p>
       </div>
-      <p className="text-muted-foreground mb-3 text-[12.5px] leading-[1.55]">
-        {t("models.cleanup.presetHint")}
-      </p>
-      <Textarea
-        value={settings.cleanupCustomPrompt}
-        maxLength={CLEANUP_CUSTOM_PROMPT_MAX}
-        onChange={(event) =>
-          settings.setCleanupCustomPrompt(event.target.value)
-        }
-        spellCheck={false}
-        className="mono min-h-[160px] resize-y text-[12px] leading-[1.65]"
-        aria-label={t("models.cleanup.promptLabel")}
-      />
-      <div className="text-muted-foreground mt-3 flex flex-wrap items-center justify-between gap-3 text-[11px]">
-        <span>{t("models.cleanup.customHint")}</span>
-        <Button
-          variant="ink"
-          size="sm"
-          onClick={() => void settings.saveCleanupCustomPrompt()}
-          disabled={settings.savingCustomPrompt || !settings.customPromptDirty}
-        >
-          {settings.savingCustomPrompt ? (
-            <>
-              <Loader2 className="animate-spin" />
-              {t("models.cleanup.saving")}
-            </>
-          ) : settings.customPromptDirty ? (
-            t("models.cleanup.save")
-          ) : (
-            <>
-              <Check />
-              {t("models.cleanup.saved")}
-            </>
-          )}
-        </Button>
+      <div className="min-[720px]:border-border/60 min-[720px]:border-l min-[720px]:pl-8">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <Eyebrow text={t("tone.cleanup.preview.resultLabel")} accent />
+          <div className="flex items-center gap-2">
+            <Eyebrow text={t("tone.cleanup.cards.custom.title")} />
+            {prompt ? (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="h-6 px-2 text-[11px]"
+              >
+                <Link to={CUSTOM_PROMPT_PATH}>
+                  {t("tone.customPrompt.edit")}
+                </Link>
+              </Button>
+            ) : null}
+          </div>
+        </div>
+        {prompt ? (
+          <div className="border-border/70 bg-secondary/40 rounded-[10px] border px-3.5 py-3">
+            <p className="mono text-muted-foreground line-clamp-3 text-[11.5px] leading-[1.6]">
+              {prompt}
+            </p>
+          </div>
+        ) : (
+          <div className="border-border/70 rounded-[10px] border border-dashed px-3.5 py-3.5">
+            <p className="text-foreground text-[12.5px] font-medium">
+              {t("tone.customPrompt.emptyTitle")}
+            </p>
+            <p className="text-muted-foreground mt-1 text-[11.5px] leading-[1.55]">
+              {t("tone.customPrompt.emptyDesc")}
+            </p>
+            <Button asChild variant="ink" size="sm" className="mt-3">
+              <Link to={CUSTOM_PROMPT_PATH}>
+                {t("tone.customPrompt.emptyCta")}
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

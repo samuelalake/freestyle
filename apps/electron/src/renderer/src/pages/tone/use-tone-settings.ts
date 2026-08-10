@@ -1,5 +1,4 @@
 import {
-  CLEANUP_PRESET_PROMPTS,
   type CleanupAppAssignment,
   type CleanupEmailTone,
   type CleanupIntensity,
@@ -232,19 +231,18 @@ export function useToneSettings() {
   const selectCleanupMode = useCallback(
     (next: CleanupIntensity) => {
       // Enablement lives on the Models page now — this only picks the strength.
-      if (next === "custom" && cleanupIntensity !== "custom") {
-        const seed =
-          cleanupCustomPrompt.trim() ||
-          CLEANUP_PRESET_PROMPTS[cleanupIntensity];
-        setCleanupCustomPrompt(seed);
-      }
-
+      //
+      // Picking "custom" deliberately does NOT seed the editor with the current
+      // preset's text. It used to, and that was a trap: the seed was only ever
+      // local draft state, so you'd see a full prompt, assume it was live, and
+      // have nothing stored until you pressed Save. Starting empty makes the
+      // index's empty state tell the truth about what will run.
       setCleanupIntensity(next);
       saveSetting(SETTINGS_KEYS.cleanupIntensity, next).catch((err) =>
         console.error("Failed to save cleanup strength:", err),
       );
     },
-    [cleanupCustomPrompt, cleanupIntensity, saveSetting],
+    [saveSetting],
   );
 
   const saveCleanupCustomPrompt = useCallback(async () => {
@@ -346,6 +344,7 @@ export function useToneSettings() {
     selectCleanupMode,
     cleanupCustomPrompt,
     setCleanupCustomPrompt,
+    savedCleanupCustomPrompt,
     customPromptDirty: cleanupCustomPrompt !== savedCleanupCustomPrompt,
     savingCustomPrompt,
     saveCleanupCustomPrompt,

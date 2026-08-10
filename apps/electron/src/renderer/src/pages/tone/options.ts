@@ -120,6 +120,9 @@ export function findDestinationBySlug(
   return DESTINATIONS.find((entry) => entry.slug === slug) ?? null;
 }
 
+/** The custom cleanup prompt lives on its own page, not under :destination. */
+export const CUSTOM_PROMPT_PATH = "/settings/tone/custom-prompt";
+
 export function destinationPath(slug: DestinationSlug): string {
   return `/settings/tone/${slug}`;
 }

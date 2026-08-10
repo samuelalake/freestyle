@@ -518,24 +518,27 @@ export function AppMarkStack({
   const visible = entries.slice(0, max);
   const hidden = entries.slice(max);
 
-  // The "+N" is its own leading slot rather than a scrim over one of the
-  // visible marks. Overlaying it on a real icon makes the badge lie: with four
-  // apps and max = 3 it would read "+1" while *two* apps were unreadable \u2014 the
-  // one it covers and the one it counts. Giving it a slot keeps N equal to the
-  // number of apps you genuinely cannot see. It still renders as an app icon
-  // (the first hidden one) under a scrim, so the stack reads as one piece.
+  // "+N" trails the marks it stands for, and gets its own slot rather than
+  // scrimming a visible one. Overlaid on a real icon the badge lies: four apps
+  // at max = 3 would read "+1" while *two* were unreadable \u2014 the one it covered
+  // and the one it counted. Its own slot keeps N equal to what you can't see.
+  // It still renders as an app icon (the first hidden one) under a scrim, so
+  // the stack reads as one piece rather than a pill bolted on the end.
   const slots = [
+    ...visible.map((entry) => ({ ...entry, overflow: 0 })),
     ...(hidden.length > 0
       ? [{ ...hidden[0]!, key: "overflow", overflow: hidden.length }]
       : []),
-    ...visible.map((entry) => ({ ...entry, overflow: 0 })),
   ];
   const hiddenLabel = hidden.map((entry) => entry.label).join(", ");
 
   return (
+    // `isolate` keeps the subtree one compositing group, so `dimmed` fades the
+    // assembled stack rather than letting each mark's ring go translucent and
+    // reveal the mark beneath it.
     <div
       className={cn(
-        "flex items-center transition-opacity duration-150",
+        "isolate flex items-center transition-opacity duration-150",
         // Routed but silent \u2014 the apps still belong here, nothing happens in
         // them. Dimming is the only at-a-glance difference between the two.
         dimmed && "opacity-50",
@@ -543,11 +546,12 @@ export function AppMarkStack({
       )}
     >
       {slots.map((slot, index) => (
+        // No explicit z-index: later siblings paint over earlier ones, so each
+        // mark is clipped on its trailing edge and the "+N" at the end stays
+        // whole.
         <span
           key={slot.key}
-          className={cn("relative inline-flex", index > 0 && "-ml-2")}
-          // Leading slot on top, so the "+N" scrim is never half-covered.
-          style={{ zIndex: slots.length - index }}
+          className={cn("relative inline-flex", index > 0 && "-ml-[5px]")}
           title={slot.overflow ? hiddenLabel : slot.label}
         >
           <RouteMark
