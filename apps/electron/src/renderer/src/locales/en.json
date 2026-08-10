@@ -529,7 +529,7 @@
       },
       "rowTitle": "Personal",
       "pageSubtitle": "How Freestyle sounds in your personal chats.",
-      "resultLabel": "What lands in Messages"
+      "resultLabel": "What lands"
     },
     "work": {
       "eyebrow": "Work correspondence",
@@ -564,7 +564,7 @@
       },
       "rowTitle": "Work",
       "pageSubtitle": "How Freestyle sounds in your work chats.",
-      "resultLabel": "What lands in Slack"
+      "resultLabel": "What lands"
     },
     "email": {
       "eyebrow": "Emails",
@@ -599,7 +599,7 @@
       },
       "rowTitle": "Email",
       "pageSubtitle": "How Freestyle sounds when you write email.",
-      "resultLabel": "What lands in Gmail"
+      "resultLabel": "What lands"
     },
     "everythingElse": {
       "eyebrow": "Everything else",
