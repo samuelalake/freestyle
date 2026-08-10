@@ -188,10 +188,33 @@ async function main() {
     await reload(cdp, s.path);
     if (s.then) await goto(cdp, s.then);
     if (s.clickSelector) {
-      await cdp.send("Runtime.evaluate", {
-        expression: `document.querySelector(${JSON.stringify(s.clickSelector)})?.click()`,
+      // Radix triggers activate on mousedown, so element.click() does nothing.
+      // Dispatch real input events at the element's centre instead.
+      const { result } = await cdp.send("Runtime.evaluate", {
+        expression: `(() => {
+          const el = document.querySelector(${JSON.stringify(s.clickSelector)});
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return JSON.stringify({
+            x: r.x + r.width / 2, y: r.y + r.height / 2,
+            label: el.textContent?.trim(),
+          });
+        })()`,
+        returnByValue: true,
       });
-      await sleep(700);
+      if (!result.value) throw new Error(`no element for ${s.clickSelector}`);
+      const t = JSON.parse(result.value);
+      const base = { x: t.x, y: t.y, button: "left", clickCount: 1 };
+      await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: t.x, y: t.y });
+      await cdp.send("Input.dispatchMouseEvent", { ...base, type: "mousePressed" });
+      await cdp.send("Input.dispatchMouseEvent", { ...base, type: "mouseReleased" });
+      await sleep(1000);
+      // Report what actually ended up selected, so a silent miss can't pass.
+      const { result: active } = await cdp.send("Runtime.evaluate", {
+        expression: `document.querySelector('[role=tab][data-state=active], [role=tab][aria-selected=true]')?.textContent?.trim() ?? "unknown"`,
+        returnByValue: true,
+      });
+      console.log(`  clicked ${t.label} -> active tab: ${active.value}`);
     }
     if (s.hover) {
       // Radix tooltips open on real pointer events, so move the mouse rather
