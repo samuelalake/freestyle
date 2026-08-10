@@ -1,14 +1,3 @@
-# Draft issue for freestyle-voice/freestyle
-
-Not posted — review first. Screenshots are referenced but **not yet captured**; see
-[Shot list](#shot-list) at the bottom for exactly what each slot needs.
-
----
-
-**Title:** Simplify the Tone page: an index you can read at a glance, with per-destination pages
-
----
-
 Picking up `ROADMAP.md` → Freestyle Core → 3️⃣ *"Improve the UI. Simplify the tones page."*
 
 Built and driven in the app. Happy to split this — the page structure, the app-routing
@@ -36,7 +25,7 @@ space below the fold.
 
 | | Before | After |
 |---|---|---|
-| | ![before](media/before-index.png) | ![after](media/after-index.png) |
+| | ![before](URLBASE/before-index.png) | ![after](URLBASE/after-index.png) |
 | Read all five values | 5 clicks, never on one screen | 1 screen, 0 clicks |
 | Navigation | hand-rolled `TabsList` (`rounded-full` + `data-active:bg-accent`) | list + drill-down; `SegmentedControl` for the one inline control |
 | App routing UI | rendered 4×, once per tab | once, on the destination it routes to |
@@ -86,7 +75,7 @@ the user writes. Most of the thinking here is about not lying in that gap.
 
 | Empty | Seeded | Editor |
 |---|---|---|
-| ![custom empty](media/after-custom-empty.png) | ![custom seeded](media/after-custom-seeded.png) | ![custom editor](media/after-custom-editor.png) |
+| ![custom empty](URLBASE/after-custom-empty.png) | ![custom seeded](URLBASE/after-custom-seeded.png) | ![custom editor](URLBASE/after-custom-editor.png) |
 
 ---
 
@@ -113,7 +102,7 @@ Three destinations that behave identically, so one page shape serves all three
 
 | Index row | Destination page |
 |---|---|
-| ![row](media/after-row-personal.png) | ![personal](media/after-personal.png) |
+| ![row](URLBASE/after-row-personal.png) | ![personal](URLBASE/after-personal.png) |
 
 ---
 
@@ -133,7 +122,7 @@ The fallback, and the one destination that isn't like the others.
 1. Index row: name, "Any app we don't recognize", current voice.
 2. Click → voice options and preview. Page ends there; nothing to route.
 
-![everywhere else](media/after-everywhere-else.png)
+![everywhere else](URLBASE/after-everywhere-else.png)
 
 ---
 
@@ -217,18 +206,3 @@ otherwise the index re-seeds stale). Custom seeding, the saved-seed preview, the
 the empty state, the fallback page, and off-state dimming all checked.
 
 ---
-
-## Shot list
-
-Slots above expect these in `specs/media/`. Window at ~1456px wide, light theme.
-
-| File | What to capture |
-|---|---|
-| `before-index.png` | Tone page at `HEAD~n` (pre-change), Cleanup tab selected, tab strip visible |
-| `after-index.png` | Tone index, Strength Medium, all four destination rows visible |
-| `after-custom-empty.png` | Strength Custom with the prompt cleared — empty state in the result column |
-| `after-custom-seeded.png` | Strength Custom freshly selected — preset sample + `Custom` `[Edit]`, tooltip showing |
-| `after-custom-editor.png` | `/settings/tone/custom-prompt` with the placeholder visible |
-| `after-row-personal.png` | Close crop of the Personal row: title, facepile, `Off ›` |
-| `after-personal.png` | Personal destination page — note "What lands in Messages" |
-| `after-everywhere-else.png` | Everywhere else page — no routing section |
