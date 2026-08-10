@@ -41,6 +41,7 @@ space below the fold.
 | Preview heading | "What lands" on every tab | "What lands in Messages" / "in Slack" / "in Gmail" |
 | Routed apps | comma-separated prose, truncates as apps are added | facepile, fixed width, `+N` overflow |
 | Current voice | inside the tab you have to open | trailing value on the row |
+| Custom prompt | 160px monospace editor inline on the page | its own page; index shows the stored prompt + Edit, or an empty state |
 | "Off" state | indistinguishable from on until you open the tab | dimmed facepile + muted value |
 | Cleanup vocabulary | tab "Cleanup", eyebrow "Cleanup", toggle "Cleanup", control "Strength", heading "Tidy up as I talk" | "How much to fix" → "Strength" |
 
@@ -70,6 +71,28 @@ A shared preview on a flat page can only say "What lands". Once each destination
 page, it can say **"What lands in Messages"** — which is the actual question the setting
 answers. That's the clearest argument for drill-down over a single scrolling page: it isn't
 about space, it's that per-destination context lets the copy get specific.
+
+## The custom prompt is a redesign, not a new feature
+
+Worth stating plainly since it's the one change that adds a route. Nothing new is
+stored or computed:
+
+- `cleanup_custom_prompt` already exists end to end — validated at
+  `apps/server/src/routes/settings.ts:88`, consumed at
+  `apps/server/src/lib/post-process.ts:125`, synced via `preferences-sync.ts`.
+- The Electron editor already existed, inline in `pages/tone.tsx`.
+- Mobile already has the same field inline in its own tone screen
+  (`apps/mobile/src/app/(app)/(tabs)/tone.tsx`).
+
+So this is presentation only: same setting, same API, no migration. Note it does put
+Electron and mobile on different shapes — mobile keeps the editor inline, which seems
+right for a phone, but flagging it rather than letting it be discovered later.
+
+One behaviour change came with it. Picking Custom used to seed the editor with the
+current preset's text — but only as **local draft state**. You'd see a full prompt, assume
+it was live, and have nothing stored until you pressed Save. It now starts empty, which is
+what lets the index's empty state say something true: *"Until you write one, nothing is
+applied."*
 
 ## On the "Cleanup is off" banner — kept, not removed
 
