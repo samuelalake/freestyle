@@ -413,7 +413,7 @@
   },
   "tone": {
     "title": "Tone",
-    "subtitle": "How much Freestyle cleans up — and how it sounds in each app.",
+    "subtitle": "How much Freestyle fixes, and how it sounds where you type.",
     "loading": "Loading tone…",
     "disabledBanner": {
       "title": "Cleanup is off.",
@@ -526,7 +526,10 @@
           "desc": "No styling — just clean text.",
           "sample": "Hey, I'm running about 10 minutes late. I'll be there soon."
         }
-      }
+      },
+      "rowTitle": "Personal",
+      "pageSubtitle": "How Freestyle sounds in your personal chats.",
+      "resultLabel": "What lands in Messages"
     },
     "work": {
       "eyebrow": "Work correspondence",
@@ -558,7 +561,10 @@
           "desc": "No styling — just clean text.",
           "sample": "I reviewed the doc. A couple changes are still needed: tighten the intro and update the footer links."
         }
-      }
+      },
+      "rowTitle": "Work",
+      "pageSubtitle": "How Freestyle sounds in your work chats.",
+      "resultLabel": "What lands in Slack"
     },
     "email": {
       "eyebrow": "Emails",
@@ -590,7 +596,10 @@
           "desc": "No email formatting — just clean text.",
           "sample": "Hi Sam, just confirming we're still on for Thursday at 2. I'll send the revised plan tomorrow morning. Let me know if you want anything else added. Thanks."
         }
-      }
+      },
+      "rowTitle": "Email",
+      "pageSubtitle": "How Freestyle sounds when you write email.",
+      "resultLabel": "What lands in Gmail"
     },
     "everythingElse": {
       "eyebrow": "Everything else",
@@ -620,7 +629,24 @@
           "desc": "No styling — just clean text.",
           "sample": "Just pushed the fix. Should be good to test now."
         }
-      }
+      },
+      "rowTitle": "Everywhere else",
+      "pageSubtitle": "How Freestyle sounds anywhere that is not a chat or an email.",
+      "resultLabel": "What lands"
+    },
+    "sections": {
+      "howMuchToFix": "How much to fix",
+      "howYouSound": "How you sound",
+      "voice": "Voice",
+      "apps": "Apps that sound {{destination}}",
+      "appsFallbackLabel": "Apps",
+      "appsFallback": "Anything that isn't listed on the other three pages lands here. There's nothing to add."
+    },
+    "strength": {
+      "desc": "Applies everywhere, in every app."
+    },
+    "row": {
+      "sounds": "Sounds {{tone}}"
     }
   },
   "models": {
