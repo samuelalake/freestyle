@@ -1,6 +1,6 @@
 # Redesign: Tone page
 
-Status: **Proposed** (awaiting review) · Scope: renderer-only · Target files:
+Status: **Built** — see `pages/tone/` (awaiting review) · Scope: renderer-only · Target files:
 `apps/electron/src/renderer/src/pages/tone.tsx`,
 `apps/electron/src/renderer/src/components/tone-previews/`
 
@@ -33,7 +33,7 @@ then pick a voice."
 | `tone.tsx` — 5 tab panels, 2 banners, 2 panel components | 1,189 | core, but bloated |
 | `tone-previews/app-marks.tsx` — brand marks for routed apps | 477 | yes (asset-shaped) |
 | `tone-previews/app-assignments.tsx` — add/remove routing UI, rendered 4× | 394 | yes, but once — not per tab |
-| `tone-previews/route-ownership.ts` — computes which tab owns an app | 153 | **symptom, not requirement** |
+| `tone-previews/route-ownership.ts` — computes which group owns an app | 153 | yes — the index rows need it (see §5.3) |
 | `email` / `work-chat` / `text-message` / `note` / `cleanup` previews | 226 | yes |
 
 ---
@@ -202,8 +202,11 @@ what made defect 02 invisible.
 
 One page per destination, reached from its row. Same layout for all four:
 
-- **`VOICE`** — the four options in the existing card layout, one layout everywhere,
-  including Strength (defect 09).
+- **`VOICE`** — the four options in the existing card layout. All four destination pages
+  now share one layout instead of splitting horizontal/vertical (defect 09). Strength is
+  the exception and deliberately so: on the index it is a compact inline control, which
+  `DESIGN.md` §6 answers with `SegmentedControl`, not cards. Defect 09 was about the *same*
+  control rendering two ways, not about every control looking alike.
 - **`PREVIEW`** — raw transcript beside the result. Because the page knows its destination,
   the heading can name the actual app: *"What lands in Messages."* The shared preview on a
   flat page could never do that.
@@ -214,10 +217,16 @@ Routing stays per-destination, which is what the current tabbed page gets right 
 superwhisper does ("Activate for apps" lives inside the mode). `+ Add app or site` opens a
 picker with **no destination dropdown** — the page you are on already decided that. Because
 an app belongs to exactly one group, one already assigned elsewhere shows its current group
-inline ("Currently Work") and choosing it **moves** it. That is the one job
-`route-ownership.ts` keeps; per-tab visibility filtering (`getVisibleBuiltinRouteIds`) goes
-away (defect 05). Chips carry an `×` on hover; removing a built-in returns it to Everywhere
-else rather than deleting it.
+inline ("Currently Work") and choosing it **moves** it (defect 05). Chips carry an `×` on
+hover; removing a built-in returns it to Everywhere else rather than deleting it.
+
+**Correction from implementation:** an earlier draft of this section said
+`getVisibleBuiltinRouteIds` "goes away". It does not, and it shouldn't. It answers "which
+built-in apps still belong to this destination, given everything the user has reassigned" —
+which the index rows need in order to print `Messages, WhatsApp, Telegram` without listing
+an app that has since been moved to Work. That is a real requirement, not tab-visibility
+plumbing. `route-ownership.ts` survives intact; what dies is the tab strip that made it feel
+like a workaround.
 
 ### 5.4 What this removes
 
