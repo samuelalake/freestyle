@@ -11,11 +11,6 @@ import { CleanupPreview } from "@renderer/components/tone-previews/cleanup-previ
 import { getVisibleBuiltinRouteIds } from "@renderer/components/tone-previews/route-ownership";
 import { Button } from "@renderer/components/ui/button";
 import { SegmentedControl } from "@renderer/components/ui/segmented-control";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@renderer/components/ui/tooltip";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -199,31 +194,29 @@ function CustomPreviewRow({
           <div className="flex items-center gap-2">
             <Eyebrow text={t("tone.cleanup.cards.custom.title")} />
             {prompt ? (
-              // The tooltip is what makes the preview honest: it says which
-              // preset the sample belongs to (or that an edited prompt can't be
-              // previewed) and sends you to the editor to change it.
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="h-6 px-2 text-[11px]"
-                  >
-                    <Link to={CUSTOM_PROMPT_PATH}>
-                      {t("tone.customPrompt.edit")}
-                    </Link>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-[260px]">
-                  {note}
-                </TooltipContent>
-              </Tooltip>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="h-6 px-2 text-[11px]"
+              >
+                <Link to={CUSTOM_PROMPT_PATH}>
+                  {t("tone.customPrompt.edit")}
+                </Link>
+              </Button>
             ) : null}
           </div>
         </div>
         {prompt ? (
-          <CleanupPreview result={sample} selected={false} />
+          <>
+            <CleanupPreview result={sample} selected={false} />
+            {/* Visible, not a tooltip. Which preset the sample belongs to is
+                the difference between an accurate preview and a misleading
+                one, so it can't hide behind hover. */}
+            <p className="text-muted-foreground mt-2 text-[11px] leading-[1.5]">
+              {note}
+            </p>
+          </>
         ) : (
           <div className="border-border/70 rounded-[10px] border border-dashed px-3.5 py-3.5">
             <p className="text-foreground text-[12.5px] font-medium">

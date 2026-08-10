@@ -173,6 +173,18 @@ async function main() {
   for (const s of shots) {
     console.log(`${s.name}: ${s.path}`);
     if (s.settings) await setSettings(s.settings);
+    if (s.localStorage) {
+      // The old page persisted its active tab, so a plain reload lands on
+      // whatever was last clicked. Writing the key while that page is mounted
+      // doesn't help either: it re-persists its own state on mount and clobbers
+      // the write. Leave the page first, then set the key, then come back.
+      await reload(cdp, "/today", 1500);
+      await cdp.send("Runtime.evaluate", {
+        expression: Object.entries(s.localStorage)
+          .map(([k, v]) => `localStorage.setItem(${JSON.stringify(k)}, ${JSON.stringify(v)});`)
+          .join(""),
+      });
+    }
     await reload(cdp, s.path);
     if (s.then) await goto(cdp, s.then);
     if (s.clickSelector) {
