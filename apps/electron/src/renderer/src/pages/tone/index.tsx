@@ -149,6 +149,27 @@ function StrengthPreviewRow({
 }
 
 /**
+ * First line of a prompt, capped for the row.
+ *
+ * Two layers, because they catch different things. The character cap stops a
+ * prompt written as one long line (the presets are ~15,000 characters with no
+ * hard wraps) from going into the DOM whole, and marks the cut with an ellipsis
+ * the reader can see. `truncate` on the element then handles any line still
+ * wider than the row at the current window size.
+ */
+const ROW_SUMMARY_MAX = 140;
+function summarizePrompt(prompt: string): string {
+  const line =
+    prompt
+      .split("\n")
+      .find((l) => l.trim())
+      ?.trim() ?? "";
+  return line.length > ROW_SUMMARY_MAX
+    ? `${line.slice(0, ROW_SUMMARY_MAX).trimEnd()}…`
+    : line;
+}
+
+/**
  * Custom shows a navigation row, not a preview.
  *
  * Low, Medium and High can each show a sample because we know what they do.
@@ -167,7 +188,7 @@ function CustomRow({
   // The *stored* prompt, not the draft — this should reflect what will actually
   // run, not what someone is part-way through typing on the other page.
   const prompt = settings.savedCleanupCustomPrompt.trim();
-  const firstLine = prompt.split("\n").find((line) => line.trim()) ?? "";
+  const firstLine = summarizePrompt(prompt);
 
   return (
     <Link

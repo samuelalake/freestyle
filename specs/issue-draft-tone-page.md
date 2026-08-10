@@ -58,18 +58,19 @@ you'd moved to another group.
 Custom used to open a text box that grew to fit the whole prompt. With a preset loaded that
 made the page 7,694px tall, and everything else sat below the fold.
 
-It's now `Custom…`, and selecting it takes you to its own page. The ellipsis and the jump are
-the same convention macOS and iOS use for an option that opens its own surface. Back on the
-root page, Custom shows a row with the first line of your prompt, matching the four group
-rows below it.
+It's now `Custom…`, and selecting it takes you to its own page with the instructions of your
+last preset pre-filled. That pre-fill only happens the first time, when you have nothing
+written; after that your own prompt is what you come back to. Back on the root page, Custom
+shows a row with the first line of your prompt.
 
 Low, Medium and High each show a sample of what they do. Custom can't, since it runs
-instructions only you write, so it doesn't pretend to. The row says what's written and takes
-you to where you change it.
+instructions only you write. The row says what's written and takes you to where you change
+it.
 
-The old "Reset to presets" link switched Strength back to Low and left Custom altogether. It
-never prefilled anything. It's now a **Start from a preset** menu: pick Low, Medium or High
-and that text loads into the editor as a draft you can rework, staying in Custom.
+The old "Reset to presets" link switched Strength back to Low and left Custom altogether.
+It's now a **Start from a preset** menu: pick Low, Medium or High and that text loads into
+the editor as a draft you can rework, staying in Custom. Users that want to change back to a
+preset can use the control on the root page.
 
 ---
 
