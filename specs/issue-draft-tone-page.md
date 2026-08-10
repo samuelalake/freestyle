@@ -20,46 +20,50 @@ change them. Four of the five tabs are also the same screen with different words
 |---|---|
 | ![before](URLBASE/before-index.png) | ![after](URLBASE/after-index.png) |
 
-| | Before | After |
-|---|---|---|
-| See all five settings | 5 clicks, never on one screen | 1 screen, 0 clicks |
-| Navigation | a custom-built tab strip | a list you click into, plus the app's standard segmented control |
-| Choosing which apps go where | repeated on all four tabs | once, on the group it applies to |
-| Option layout | horizontal on one tab, vertical on the other four | the same everywhere |
-| Which apps are in a group | a comma list that runs out of room | overlapping icons, fixed width |
-| The current voice | inside the tab you have to open | on the row |
-| Custom prompt | a large text box that pushed everything else off screen | its own page |
-| A group set to "Off" | looks the same as one that's on | faded icons and a muted label |
-| Wording | "Cleanup" named a tab, a heading, a toggle, and a control called "Strength" | "How much to fix" → "Strength" |
+Every setting is now on one screen. Before it took five clicks and you still couldn't see
+them together.
 
-Each row reads name, then the apps it covers, then what it sounds like. Same shape Wispr Flow
-and macOS System Settings use.
+The tab strip is gone. In its place is a list you click into, and the app's standard
+segmented control for Strength. Each row reads name, then the apps it covers, then what it
+sounds like. Same shape Wispr Flow and macOS System Settings use.
+
+Choosing which apps go where used to be repeated on all four tabs. It now lives once, on the
+group it applies to. The comma list of app names that ran out of room is now a row of
+overlapping icons that stays a fixed width. A group set to "Off" shows faded icons and a
+muted label, so you can tell it apart from one that's on without opening it.
+
+Two smaller fixes. The four option cards were laid out horizontally on one tab and
+vertically on the other four; they match now. And "Cleanup" used to name a tab, a heading, a
+toggle, and a control called "Strength". The section is now "How much to fix" and the control
+is "Strength".
 
 ---
 
 ## 2. Strength → Custom
 
-| Nothing written yet | Just switched to Custom | Writing the prompt |
+| Just switched to Custom | The tooltip on Edit | The prompt page |
 |---|---|---|
-| ![custom empty](URLBASE/after-custom-empty.png) | ![custom seeded](URLBASE/after-custom-seeded.png) | ![custom editor](URLBASE/after-custom-editor.png) |
+| ![custom seeded](URLBASE/after-custom-seeded.png) | ![tooltip](URLBASE/after-custom-tooltip.png) | ![editor](URLBASE/after-custom-startfrom.png) |
 
-Low, Medium and High each show a sample of what they do. Custom can't. It runs instructions
-only you write.
+The custom prompt now has its own page at `/settings/tone/custom-prompt`. Inline it was a
+large text box that pushed all four app groups off screen, for a setting most people never
+open. The index keeps a preview row with an `Edit` button that links to it.
 
-Switching to Custom now copies the preset you were on and saves it. You start by editing
-something that works. While the prompt is still that preset, the preview shows that preset's
-sample and a tooltip names it. Edit the prompt and the preview falls back to a generic line.
+Low, Medium and High each show a sample of what they do. Custom can't, because it runs
+instructions only you write. Switching to Custom copies the preset you were on, so while the
+prompt is still that preset the preview shows that preset's sample. Hovering `Edit` says
+which one. Edit the prompt and the preview falls back to a generic line.
 
-Two things changed while building this.
+The old "Reset to presets" link switched Strength back to Low and left Custom altogether. It
+never prefilled anything. It's now a **Start from a preset** menu: pick Low, Medium or High
+and that text loads into the editor as a draft you can rework, staying in Custom. The draft
+is left unsaved, since you'll want to edit it before it counts.
 
-You can no longer save an empty prompt. The server quietly falls back to the Low preset when
-Custom has nothing behind it (`resolveBaseCleanupPrompt` in
-`apps/server/src/lib/editor/prompts.ts`). Choosing "Custom" and silently getting Low is not
-what anyone expects.
+You can no longer save an empty prompt.
 
-I also removed the "Reset to presets" link. It always reverted to Low without saying so, and
-the plural label implied a choice it never offered. Strength on the index picks between the
-three, one click away.
+That leaves the "no prompt yet" state mostly unreachable, since switching to Custom fills it
+and you can't save it empty. It's still there for anyone who already had Custom selected with
+nothing written before this change.
 
 ---
 
@@ -73,9 +77,9 @@ Each group gets its own page holding its four options and its app list. Choosing
 belong to a group happens there. Before, that control appeared on all four tabs at once, so
 moving Discord from Personal to Work meant first working out which tab owned it.
 
-The icons on the row overlap, so the row is the same width whether a group has three apps or
-thirty. Past five they collapse into a "+2" you can hover to read. Apps you added yourself
-come first, so the built-in ones are what gets hidden:
+The icons on the row overlap and reach a maximum size once more than five apps are added to
+the group, so the row is the same width whether a group has six apps or thirty. The last app
+you added shows first in the stack.
 
 ![overflow](URLBASE/after-overflow.png)
 
@@ -85,11 +89,9 @@ come first, so the built-in ones are what gets hidden:
 
 ![everywhere else](URLBASE/after-everywhere-else.png)
 
-This group has no "add an app" section. You can't add an app to it. The group is whatever the
-other three don't cover, so naming an app here would move it out.
-
-The subtitle explains that instead. The old line said "anywhere that isn't a chat or email",
-which missed anything you'd moved to another group.
+This group has no "add an app" section. You can't add an app to it. The subtitle explains
+that instead. The old line said "anywhere that isn't a chat or email", which missed anything
+you'd moved to another group.
 
 ---
 
@@ -110,7 +112,7 @@ wording fixes above.
 - **The "Cleanup is off" banner.** Tone decides whether to show it from one setting. The
   Models page treats cleanup as permanently on for Freestyle Transcribe users and disables
   the toggle. So on the default setup Tone tells you to turn on something Models won't let
-  you touch. It's a real bug and I'm filing it separately, since the fix is to work out "is
-  cleanup active" in one place rather than anything on this page.
+  you touch. Out of scope here since it's a bug in how the two pages disagree, not a layout
+  question.
 
 Typecheck and Biome clean per `CONTRIBUTING.md`.
