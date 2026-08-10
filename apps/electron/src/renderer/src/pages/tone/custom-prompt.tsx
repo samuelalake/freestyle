@@ -1,7 +1,16 @@
-import { CLEANUP_CUSTOM_PROMPT_MAX } from "@freestyle-voice/validations";
+import {
+  CLEANUP_CUSTOM_PROMPT_MAX,
+  CLEANUP_PRESET_PROMPTS,
+} from "@freestyle-voice/validations";
 import { Button } from "@renderer/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@renderer/components/ui/dropdown-menu";
 import { Textarea } from "@renderer/components/ui/textarea";
-import { Check, ChevronLeft, Loader2 } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Eyebrow, PageHeader, PageShell } from "../models/page-chrome";
@@ -49,13 +58,37 @@ export default function ToneCustomPromptPage(): React.JSX.Element {
 
         <ToneStateBanner settings={settings} />
 
-        {/* No "Reset to presets" button here. It reverted to Low without
-            saying so, while its plural label implied a choice of preset. The
-            Strength control on the index already picks between Low, Medium and
-            High, and it's one click away via the back link above. */}
         <section className="mt-7 mb-2">
-          <Eyebrow text={t("models.cleanup.promptLabel")} mono />
-          <div className="mt-2.5" />
+          <div className="mb-2.5 flex items-center justify-between gap-3">
+            <Eyebrow text={t("models.cleanup.promptLabel")} mono />
+            {/* Was "Reset to presets", which switched Strength back to Low and
+                left Custom altogether. Same entry point, different job: load a
+                preset's text as a starting draft and stay in Custom, so you can
+                rework one instead of starting from an empty box. Left unsaved
+                so it's yours to edit before it counts. */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-7 text-[12px]">
+                  {t("tone.customPrompt.startFrom")}
+                  <ChevronDown aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {(["low", "medium", "high"] as const).map((preset) => (
+                  <DropdownMenuItem
+                    key={preset}
+                    onSelect={() =>
+                      settings.setCleanupCustomPrompt(
+                        CLEANUP_PRESET_PROMPTS[preset],
+                      )
+                    }
+                  >
+                    {t(`tone.cleanup.cards.${preset}.title`)}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <Textarea
             value={settings.cleanupCustomPrompt}
             maxLength={CLEANUP_CUSTOM_PROMPT_MAX}

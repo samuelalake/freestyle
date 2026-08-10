@@ -175,6 +175,27 @@ async function main() {
     if (s.settings) await setSettings(s.settings);
     await reload(cdp, s.path);
     if (s.then) await goto(cdp, s.then);
+    if (s.clickSelector) {
+      await cdp.send("Runtime.evaluate", {
+        expression: `document.querySelector(${JSON.stringify(s.clickSelector)})?.click()`,
+      });
+      await sleep(700);
+    }
+    if (s.hover) {
+      // Radix tooltips open on real pointer events, so move the mouse rather
+      // than dispatching a synthetic mouseenter.
+      const { result } = await cdp.send("Runtime.evaluate", {
+        expression: `(() => {
+          const el = document.querySelector(${JSON.stringify(s.hover)});
+          const r = el.getBoundingClientRect();
+          return JSON.stringify({ x: r.x + r.width / 2, y: r.y + r.height / 2 });
+        })()`,
+        returnByValue: true,
+      });
+      const p = JSON.parse(result.value);
+      await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: p.x, y: p.y });
+      await sleep(1200);
+    }
     if (s.click) {
       await cdp.send("Runtime.evaluate", {
         expression: `(() => {

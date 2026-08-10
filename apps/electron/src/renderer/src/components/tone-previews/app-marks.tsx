@@ -435,7 +435,10 @@ export function orderedMarkEntries(
   assignments: readonly CleanupAppAssignment[] = [],
 ) {
   return [
-    ...assignments.map((assignment) => ({
+    // Newest first. Assignments are stored in the order they were added, so
+    // reversing puts the app you just routed at the head of the stack, where
+    // you'd look to confirm it landed.
+    ...[...assignments].reverse().map((assignment) => ({
       key: `${assignment.kind}:${assignment.match}`,
       assignment,
       label: assignment.label,
