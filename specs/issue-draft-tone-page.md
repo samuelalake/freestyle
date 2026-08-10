@@ -55,22 +55,20 @@ you'd moved to another group.
 |---|---|---|
 | ![before custom](URLBASE/before-cleanup-custom.png) | ![custom row](URLBASE/after-custom-row.png) | ![custom page](URLBASE/after-custom-startfrom.png) |
 
-Custom used to open a text box that grew to fit the whole prompt. With a preset loaded that
-made the page 7,694px tall, and everything else sat below the fold.
+Custom used to open a text box that grew to fit the whole prompt, making the page 7,694px
+tall with everything else below the fold.
 
-Selecting Custom now takes you to its own page, with the instructions of your last preset
-pre-filled. That pre-fill only happens the first time, when you have nothing
-written; after that your own prompt is what you come back to. Back on the root page, Custom
-shows a row with the first line of your prompt.
+Selecting Custom now takes you to its own page, with your last preset pre-filled the first
+time. After that your own prompt is what you come back to. On the root page, Custom shows a
+row with the first line of it.
 
 Low, Medium and High each show a sample of what they do. Custom can't, since it runs
-instructions only you write. The row says what's written and takes you to where you change
+instructions only you write, so the row says what's written and takes you to where you change
 it.
 
-The old "Reset to presets" link switched Strength back to Low and left Custom altogether.
-It's now a **Start from a preset** menu: pick Low, Medium or High and that text loads into
-the editor as a draft you can rework, staying in Custom. Users that want to change back to a
-preset can use the control on the root page.
+"Reset to presets" used to switch Strength back to Low and leave Custom altogether. It's now
+**Start from a preset**: pick Low, Medium or High and that text loads into the editor as a
+draft, staying in Custom. To leave Custom, use the control on the root page.
 
 ---
 
@@ -87,8 +85,10 @@ wording fixes above.
   it and turn something on.
 - **One mislabelled option.** In Work, the setting saved as `friendly` displays as
   "Enthusiastic" and is described as "Upbeat and warm".
-- **The "Cleanup is off" banner.** Tone shows a banner saying cleanup is off and points you
-  to Models to turn it on. For Freestyle Transcribe users, Models already has it on and
-  greyed out. The banner sends you to fix something you can't change. Separate bug.
+- **The "Cleanup is off" banner.** Tone shows this banner and points you to Models to turn
+  cleanup on. For Freestyle Transcribe users, Models already has it on and greyed out, so the
+  banner sends you to fix something you can't change. Separate bug.
+
+  ![cleanup banner](URLBASE/before-banner.png)
 
 Typecheck and Biome clean per `CONTRIBUTING.md`.
