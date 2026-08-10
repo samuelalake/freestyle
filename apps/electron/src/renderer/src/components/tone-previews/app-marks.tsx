@@ -421,6 +421,29 @@ export function AppMark({
   return <RouteMark id={id} size={size} className={className} />;
 }
 
+/**
+ * Marks in display order: apps the user added first, built-in defaults after.
+ *
+ * Order matters because the facepile truncates. Built-ins are defaults nobody
+ * chose; a route you added by hand is the one you'd notice missing, so it
+ * should never be the first thing hidden behind "+N". `AppMarkRow` doesn't
+ * truncate, but shares the order so the two surfaces don't disagree about a set
+ * of icons the user sees in both places.
+ */
+export function orderedMarkEntries(
+  ids: readonly AppMarkId[],
+  assignments: readonly CleanupAppAssignment[] = [],
+) {
+  return [
+    ...assignments.map((assignment) => ({
+      key: `${assignment.kind}:${assignment.match}`,
+      assignment,
+      label: assignment.label,
+    })),
+    ...ids.map((id) => ({ key: id, id, label: APP_MARKS[id].label }) as const),
+  ];
+}
+
 export function AppMarkRow({
   ids,
   assignments = [],
@@ -435,38 +458,22 @@ export function AppMarkRow({
   trailing?: React.ReactNode;
 }): React.JSX.Element {
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
-  const entries = [
-    ...ids.map((id) => ({ key: id, id }) as const),
-    ...assignments.map((assignment) => ({
-      key: `${assignment.kind}:${assignment.match}`,
-      assignment,
-    })),
-  ];
+  const entries = orderedMarkEntries(ids, assignments);
 
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex flex-wrap items-center gap-2">
-        {entries.map((entry) =>
-          "id" in entry ? (
-            <RouteMark
-              key={entry.key}
-              id={entry.id}
-              size={size}
-              interactive
-              onEnter={() => setActiveLabel(APP_MARKS[entry.id].label)}
-              onExit={() => setActiveLabel(null)}
-            />
-          ) : (
-            <RouteMark
-              key={entry.key}
-              assignment={entry.assignment}
-              size={size}
-              interactive
-              onEnter={() => setActiveLabel(entry.assignment.label)}
-              onExit={() => setActiveLabel(null)}
-            />
-          ),
-        )}
+        {entries.map((entry) => (
+          <RouteMark
+            key={entry.key}
+            id={"id" in entry ? entry.id : undefined}
+            assignment={"assignment" in entry ? entry.assignment : undefined}
+            size={size}
+            interactive
+            onEnter={() => setActiveLabel(entry.label)}
+            onExit={() => setActiveLabel(null)}
+          />
+        ))}
         {trailing}
       </div>
       <div className="text-muted-foreground min-h-[16px] text-[11px] leading-none">
@@ -482,18 +489,17 @@ export function AppMarkRow({
  * Unlike `AppMarkRow` (which lays marks out flat and needs a caption line to
  * name them) this stays a fixed-ish width no matter how many apps route to a
  * destination, so a row with nine apps doesn't push its trailing value off the
- * edge. Overflow collapses into the leading mark: with `max = 3` and five apps
- * you get three slots, the first carrying a "+2" scrim.
+ * edge.
  *
- * Marks are stacked leading-on-top so the scrim is never the obscured one.
- * Every mark keeps its own `title`, and the leading one names what it hides,
- * so the labels `AppMarkRow` prints below are still reachable on hover.
+ * `max` is 5 rather than 3: every stock destination has at most four apps, so a
+ * lower cap spent a hidden app to save ~20px on a row with room to spare.
+ * Overflow should start when someone has actually built up routes.
  */
 export function AppMarkStack({
   ids,
   assignments = [],
   size = 22,
-  max = 3,
+  max = 5,
   dimmed,
   className,
 }: {
@@ -504,14 +510,7 @@ export function AppMarkStack({
   dimmed?: boolean;
   className?: string;
 }): React.JSX.Element | null {
-  const entries = [
-    ...ids.map((id) => ({ key: id, id, label: APP_MARKS[id].label }) as const),
-    ...assignments.map((assignment) => ({
-      key: `${assignment.kind}:${assignment.match}`,
-      assignment,
-      label: assignment.label,
-    })),
-  ];
+  const entries = orderedMarkEntries(ids, assignments);
 
   if (entries.length === 0) return null;
 
@@ -549,9 +548,17 @@ export function AppMarkStack({
         // No explicit z-index: later siblings paint over earlier ones, so each
         // mark is clipped on its trailing edge and the "+N" at the end stays
         // whole.
+        // `bg-card` is what makes a mark occlude the one behind it. Half the
+        // marks are transparent tiles holding circular art (Telegram, Slack,
+        // Gmail…), so without an opaque backing the neighbour shows through
+        // their corners — WhatsApp's green bled up Telegram's left edge. The
+        // ring alone can't fix it: the bleed is the whole corner, not 2px.
         <span
           key={slot.key}
-          className={cn("relative inline-flex", index > 0 && "-ml-[5px]")}
+          className={cn(
+            "bg-card relative inline-flex rounded-[8px]",
+            index > 0 && "-ml-[5px]",
+          )}
           title={slot.overflow ? hiddenLabel : slot.label}
         >
           <RouteMark
